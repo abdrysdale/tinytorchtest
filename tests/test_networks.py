@@ -9,20 +9,18 @@ import torch
 
 class SingleArgRegression(torch.nn.Module):
     """Single argument input (deep) neural network block"""
-    def __init__(self, layers, **kwargs):
+    def __init__(self, layers):
         """Neural network class with a single positional arguments
 
-        Args:
-            layers (list) : A list of the size of each layer.
-
-        Kwargs:
-            activation (torch.nn activation function) : Module activation function.
-                Defaults to torch.nn.ReLU
+        Parameters
+        ----------
+            layers : list
+                A list of the size of each layer.
         """
         super().__init__()
 
-        # Keyword arguments
-        self.activation = kwargs.get("activation", torch.nn.ReLU)
+        # Activation function
+        self.activation = torch.nn.ReLU
 
         # Parameters
         self.depth = len(layers) - 1
@@ -50,16 +48,14 @@ class SingleArgRegression(torch.nn.Module):
 
 class MultiArgRegression(torch.nn.Module):
     """Multiple argument input (deep) neural network block"""
-    def __init__(self, layers, **kwargs):
+    def __init__(self, layers):
         """Neural network class with multiple positional arguments
 
-        Args:
-            layers (list) : A list of the size of each layer.
+        Parameters
+        ----------
+            layers : list
+                A list of the size of each layer.
 
-        Kwargs:
-            activation (torch.nn activation function) : Module activation function.
-                Defaults to torch.nn.ReLU
-            device (str) : Device to store tensors. Defaults to "cpu".
         """
         super().__init__()
         self.layers = SingleArgRegression(layers, **kwargs)
