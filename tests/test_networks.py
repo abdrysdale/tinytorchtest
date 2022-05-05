@@ -58,7 +58,7 @@ class MultiArgRegression(torch.nn.Module):
 
         """
         super().__init__()
-        self.layers = SingleArgRegression(layers, **kwargs)
+        self.layers = SingleArgRegression(layers)
 
     def forward(self, arg_1, arg_2):
         """Forward pass"""
