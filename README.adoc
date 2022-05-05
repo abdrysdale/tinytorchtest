@@ -6,6 +6,14 @@ torchtest is mostly a pytorch port of mltest(which was written for tensorflow).
 
 Forked from https://github.com/BrianPugh/torchtest[BrainPugh] who forked the repo from https://github.com/suriyadeepan/torchtest[suriyadeepan].
 
+Notable changes:
+
+* Support for models to have multiple positional arguments.
+* Support for unsupervised learning.
+* Fewer requirements (due to streamlining testing).
+* More comprehensive changes.
+* Still active? I've created an https://github.com/suriyadeepan/torchtest/issues/6[issue] to double check but it looks like the original maintainer is no longer actioning pull requests.
+
 == Installation
 
 [source, bash]
