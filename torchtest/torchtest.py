@@ -494,3 +494,5 @@ def test_suite(model, loss_fn, optim, batch,
   # GPU test
   if test_gpu_available:
     assert_uses_gpu()
+
+  return True
