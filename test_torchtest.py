@@ -36,6 +36,7 @@ def test_regression():
         data,
         test_vars_change=True,
         test_inf_vals=True,
+        test_nan_vals=True,
     )
 
 if __name__ == '__main__':
