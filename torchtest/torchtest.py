@@ -68,7 +68,7 @@ def _pack_batch(x, device):
         return _helper(x)
 
 
-def _train_step(model, loss_fn, optim, batch, device):
+def _train_step(model, loss_fn, optim, batch, device, supervised=True):
   """Run a training step on model for a given batch of data
 
   Parameters of the model accumulate gradients and the optimizer performs
@@ -84,6 +84,11 @@ def _train_step(model, loss_fn, optim, batch, device):
     an optimizer instance
   batch : list
     a 2 element list of inputs and labels, to be fed to the model
+  supervised : bool, optional
+    If true, expects batch to contain [inputs, targets].
+    Else, expects batch to be the model inputs.
+    If supervised=False then the loss_fn is only fed in the model outputs.
+    Defaults to True.
   """
 
   # put model in train mode
@@ -93,15 +98,28 @@ def _train_step(model, loss_fn, optim, batch, device):
   #  run one forward + backward step
   # clear gradient
   optim.zero_grad()
+
   # inputs and targets
-  inputs, targets = batch[0], batch[1]  # Need to recursively move these to device
-  # move data to DEVICE
+  if supervised:
+    inputs, targets = batch[0], batch[1]  # Need to recursively move these to device
+    targets = _pack_batch(targets, device) # Moves targets to device
+
+  else:
+    inputs = batch
+
+  # Moves inputs to device
   inputs = _pack_batch(inputs, device)
-  targets = _pack_batch(targets, device)
+
   # forward
   likelihood = model(*inputs)
   # calc loss
-  loss = loss_fn(likelihood, *targets)
+
+  # Gets loss
+  if supervised:
+    loss = loss_fn(likelihood, *targets)
+  else:
+    loss = loss_fn(likelihood)
+
   # backward
   loss.backward()
   # optimization step
@@ -135,7 +153,7 @@ def _forward_step(model, batch, device):
     # forward
     return model(*inputs)
 
-def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None): 
+def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None, **kwargs): 
   """Check if given variables (params) change or not during training
 
   If parameters (params) aren't provided, check all parameters.
@@ -154,6 +172,8 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
     a 2 element list of inputs and labels, to be fed to the model
   params : list, optional
     list of parameters of form (name, variable)
+  **kwarg supervised : bool
+    True for supervised learning models. False otherwise.
 
   Raises
   ------
@@ -170,7 +190,7 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
   initial_params = [ (name, p.clone()) for (name, p) in params ]
 
   # run a training step
-  _train_step(model, loss_fn, optim, batch, device)
+  _train_step(model, loss_fn, optim, batch, device, **kwargs)
 
   # check if variables have changed
   for (_, p0), (name, p1) in zip(initial_params, params):
@@ -203,7 +223,7 @@ def assert_uses_gpu():
         "GPU inaccessible"
         )
 
-def assert_vars_change(model, loss_fn, optim, batch, device, params=None):
+def assert_vars_change(model, loss_fn, optim, batch, device, params=None, **kwargs):
   """Make sure that the given parameters (params) DO change during training
 
   If parameters (params) aren't provided, check all parameters.
@@ -220,6 +240,8 @@ def assert_vars_change(model, loss_fn, optim, batch, device, params=None):
     a 2 element list of inputs and labels, to be fed to the model
   params : list, optional
     list of parameters of form (name, variable)
+  **kwarg supervised : bool
+    True for supervised learning models. False otherwise.
 
   Raises
   ------
@@ -227,9 +249,9 @@ def assert_vars_change(model, loss_fn, optim, batch, device, params=None):
     If params do not change during training
   """
 
-  _var_change_helper(True, model, loss_fn, optim, batch, device, params)
+  _var_change_helper(True, model, loss_fn, optim, batch, device, params, **kwargs)
 
-def assert_vars_same(model, loss_fn, optim, batch, device, params=None):
+def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs):
   """Make sure that the given parameters (params) DO NOT change during training
 
   If parameters (params) aren't provided, check all parameters.
@@ -246,6 +268,8 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None):
     a 2 element list of inputs and labels, to be fed to the model
   params : list, optional
     list of parameters of form (name, variable)
+  **kwarg supervised : bool
+    True for supervised learning models. False otherwise.
 
   Raises
   ------
@@ -253,7 +277,7 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None):
     If params change during training
   """
 
-  _var_change_helper(False, model, loss_fn, optim, batch, device, params)
+  _var_change_helper(False, model, loss_fn, optim, batch, device, params, **kwargs)
 
 def assert_any_greater_than(tensor, value):
   """Make sure that one or more elements of tensor greater than value
@@ -409,7 +433,9 @@ def test_suite(model, loss_fn, optim, batch,
     test_nan_vals=False,
     test_inf_vals=False,
     test_gpu_available=False,
-    device='cpu'):
+    device='cpu',
+    **kwargs,
+):
   """Test Suite : Runs the tests enabled by the user
 
   If output_range is None, output of model is tested against (MODEL_OUT_LOW, 
@@ -444,6 +470,8 @@ def test_suite(model, loss_fn, optim, batch,
     switch to turn on or off test for presence of Inf values (default is False)
   test_gpu_available : boolean, optional
     switch to turn on or off GPU availability test (default is False)
+  **kwarg supervised : bool
+    True for supervised learning models. False otherwise.
 
   Raises
   ------
@@ -461,15 +489,15 @@ def test_suite(model, loss_fn, optim, batch,
 
   # check if all variables change
   if test_vars_change:
-    assert_vars_change(model, loss_fn, optim, batch, device)
+    assert_vars_change(model, loss_fn, optim, batch, device, **kwargs)
 
   # check if train_vars change
   if train_vars is not None:
-    assert_vars_change(model, loss_fn, optim, batch, device, params=train_vars)
+    assert_vars_change(model, loss_fn, optim, batch, device, params=train_vars, **kwargs)
 
   # check if non_train_vars don't change
   if non_train_vars is not None:
-    assert_vars_same(model, loss_fn, optim, batch, device, params=non_train_vars)
+    assert_vars_same(model, loss_fn, optim, batch, device, params=non_train_vars, **kwargs)
 
   # run forward once
   model_out = _forward_step(model, batch, device)

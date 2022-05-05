@@ -79,8 +79,42 @@ def test_regression_multi_args():
         test_nan_vals=True,
     )
 
+def test_regression_unsupervised():
+    """Tests an unsupervised regression problem"""
+    torch.manual_seed(1)
+
+    # Setup test suite
+    tt.setup()
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgRegression(layers)
+
+    # Data
+    data = torch.rand(4, 3)
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    def _loss(output):
+        return torch.mean(output**2)
+
+    # run all tests
+    assert tt.test_suite(
+        model,
+        _loss,
+        optim,
+        data,
+        test_vars_change=True,
+        test_inf_vals=True,
+        test_nan_vals=True,
+        supervised=False,
+    )
+
 if __name__ == '__main__':
     print("Running tests...")
     test_regression()
     test_regression_multi_args()
+    test_regression_unsupervised()
     print("Testing complete!")
