@@ -8,7 +8,8 @@ import torch
 from torchtest import torchtest as tt
 import test_networks
 
-def test_classifier():
+def test_regression():
+    """Tests if a single argument regression trains"""
     torch.manual_seed(1)
     # setup test suite
     tt.setup()
@@ -36,4 +37,4 @@ def test_classifier():
     )
 
 if __name__ == '__main__':
-    test_classifier()
+    test_regression()
