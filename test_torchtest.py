@@ -51,7 +51,10 @@ def test_regression_multi_args():
     model = test_networks.MultiArgRegression(layers)
 
     # Data
-    data = [(torch.rand(4, 2), torch.rand(4,1)), torch.rand(4,1)]
+    data = [
+        (torch.rand(4, 2), torch.rand(4,1)),    # Inputs
+        torch.rand(4,1),                        # Correct outputs
+    ]
 
     # Optimiser
     optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
