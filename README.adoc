@@ -4,6 +4,8 @@ A Tiny Test Suite for pytorch based Machine Learning models, inspired by https:/
 Chase Roberts lists out 4 basic tests in his https://medium.com/@keeper6928/mltest-automatically-test-neural-network-models-in-one-function-call-eb6f1fa5019d[medium post] about mltest. 
 torchtest is mostly a pytorch port of mltest(which was written for tensorflow).
 
+Forked from https://github.com/BrianPugh/torchtest[BrainPugh] who forked the repo from https://github.com/suriyadeepan/torchtest[suriyadeepan].
+
 == Installation
 
 [source, bash]
