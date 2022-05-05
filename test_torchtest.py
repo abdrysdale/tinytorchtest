@@ -1,50 +1,38 @@
-from torchtest import torchtest as tt
-import tc
+"""Testing for torchtest"""
+#! /usr/bin/env python
 
+# Module imports
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
+# Local imports
+from torchtest import torchtest as tt
+import test_networks
 
 def test_classifier():
     torch.manual_seed(1)
     # setup test suite
     tt.setup()
 
-    # define model params
-    hparams={
-        'vocab_size'  : 100, 
-        'emb_dim'     : 20,
-        'hidden_dim'  : 30,
-        'output_size' : 2,
-        'loss_fn'     : F.cross_entropy,
-        'batch_size'  : 10
-    }
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgRegression(layers)
 
-    # create model
-    model = tc.LstmClassifier(hparams, weights={
-        # not really GloVe; random samples from uniform distribution
-        'glove' : torch.rand(hparams['vocab_size'], hparams['emb_dim'])
-    }) 
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
 
-    # create a random batch
-    #  lets say seq_len = 15
-    batch = [ 
-        torch.randint(0, hparams['vocab_size'], (hparams['batch_size'], 15)).long(), 
-        torch.randint(0, hparams['output_size'], (hparams['batch_size'],)).long() 
-    ]
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
 
     # run all tests
-    tt.test_suite(
+    assert tt.test_suite(
         model,
-        hparams['loss_fn'], # loss function
-        torch.optim.Adam([p for p in model.parameters() if p.requires_grad]), # optimizer
-        batch, # random data
-        non_train_vars= [ # embedding is supposed to be fixed 
-            ('embedding.weight', model.embedding.weight) # variable(s) to check for change
-        ],
-        test_gpu_available=True,
-        device='cuda:0'
+        loss_fn,
+        optim,
+        data,
+        test_vars_change=True,
     )
 
 if __name__ == '__main__':
