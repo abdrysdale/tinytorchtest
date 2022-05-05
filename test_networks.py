@@ -66,5 +66,6 @@ class MultiArgRegression(torch.nn.Module):
 
     def forward(self, arg_1, arg_2):
         """Forward pass"""
-        nn_input = torch.cat((arg_1, arg_2))
+        print(arg_1, arg_2)
+        nn_input = torch.cat((arg_1, arg_2), dim=1)
         return self.layers(nn_input)
