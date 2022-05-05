@@ -11,7 +11,8 @@ import test_networks
 def test_regression():
     """Tests if a single argument regression trains"""
     torch.manual_seed(1)
-    # setup test suite
+
+    # Setup test suite
     tt.setup()
 
     # Model
@@ -34,7 +35,10 @@ def test_regression():
         optim,
         data,
         test_vars_change=True,
+        test_inf_vals=True,
     )
 
 if __name__ == '__main__':
+    print("Running tests...")
     test_regression()
+    print("Testing complete!")
