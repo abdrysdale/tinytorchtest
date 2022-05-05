@@ -118,5 +118,6 @@ dmypy.json
 
 # vim swap
 .*.swp
+.*.swo
 # gedit - just in case
 *~
