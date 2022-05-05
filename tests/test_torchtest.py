@@ -1,10 +1,16 @@
 """Testing for torchtest"""
 #! /usr/bin/env python
 
+# Python imports
+import os
+import sys
+
 # Module imports
 import torch
 
 # Local imports
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from torchtest import torchtest as tt
 import test_networks
 
