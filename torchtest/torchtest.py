@@ -131,9 +131,9 @@ def _forward_step(model, batch, device):
     # inputs and targets
     inputs = batch[0]
     # move data to DEVICE
-    inputs = inputs.to(device)
+    inputs = _pack_batch(inputs, device)
     # forward
-    return model(inputs)
+    return model(*inputs)
 
 def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None): 
   """Check if given variables (params) change or not during training
@@ -420,7 +420,7 @@ def test_suite(model, loss_fn, optim, batch,
   model : torch.nn.Module
     torch model, an instance of torch.nn.Module
   loss_fn : function
-    a loss function from torch.nn.functional 
+    a loss function from torch.nn.functional
   optim : torch.optim.Optimizer
     an optimizer instance
   batch : list
