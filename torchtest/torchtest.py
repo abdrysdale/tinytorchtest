@@ -37,7 +37,7 @@ def setup(seed=0):
     torch.manual_seed(seed)
 
 def _pack_batch(x, device):
-    """ Packages object ``x`` into a tuple to be unpacked. 
+    """ Packages object ``x`` into a tuple to be unpacked.
 
     Recursively transfers all tensor objects to device
 
@@ -110,13 +110,13 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
     inputs = _pack_batch(inputs, device)
 
     # forward
-    likelihood = model(*inputs)
+    outputs = model(*inputs)
 
     # Gets loss
     if supervised:
-        loss = loss_fn(likelihood, *targets)
+        loss = loss_fn(outputs, *targets)
     else:
-        loss = loss_fn(likelihood)
+        loss = loss_fn(outputs)
 
     # backward
     loss.backward()
