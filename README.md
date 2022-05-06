@@ -65,7 +65,8 @@ assert_vars_change(
     model=model,
     loss_fn=F.cross_entropy,
     optim=torch.optim.Adam(model.parameters()),
-    batch=batch)
+    batch=batch,
+)
 ```
 
 ``` python
@@ -155,6 +156,34 @@ test_suite(
     loss_fn, optim, batch,
     test_inf_vals=True
     )
+```
+
+## Unsupervised learning
+
+``` python
+from torchtest import assert_vars_change
+
+batch = torch.randn(20, 20)
+model = nn.Linear(20, 2)
+
+# This isn't a very useful loss function
+# but is here as an example of a loss function
+# that doesn't have any correct labels.
+# More typically this could be a physics informed 
+# neural network loss function or some other
+# unsupervised loss function
+def loss_fn(output):
+	return torch.mean(output**2)
+
+# We set supervised to false, to let the test suite
+# know that there aren't any targets or correct labels.
+assert_vars_change(
+    model=model,
+    loss_fn=loss_fn,
+    optim=torch.optim.Adam(model.parameters()),
+    batch=batch,
+	supervised=False,
+)
 ```
 
 # Debugging
