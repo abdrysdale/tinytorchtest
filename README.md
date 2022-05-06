@@ -5,6 +5,8 @@ post](https://medium.com/@keeper6928/mltest-automatically-test-neural-network-mo
 about mltest. torchtest is mostly a pytorch port of mltest(which was
 written for tensorflow).
 
+--- 
+
 Forked from [BrainPugh](https://github.com/BrianPugh/torchtest) who
 forked the repo from
 [suriyadeepan](https://github.com/suriyadeepan/torchtest).
@@ -24,13 +26,13 @@ Notable changes:
     double check but it looks like the original maintainer is no longer
     actioning pull requests.
 
-# Installation {#_installation}
+# Installation
 
 ``` bash
 pip install --upgrade torchtest
 ```
 
-# Tests {#_tests}
+# Tests
 
 ``` python
 # imports for examples
@@ -40,7 +42,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 ```
 
-## Variables Change {#_variables_change}
+## Variables Change
 
 ``` python
 from torchtest import assert_vars_change
@@ -76,7 +78,7 @@ assert_vars_change(
 # YES! bias did not change
 ```
 
-## Variables Don't Change {#_variables_don_8217_t_change}
+## Variables Don't Change
 
 ``` python
 from torchtest import assert_vars_same
@@ -93,7 +95,7 @@ assert_vars_same(
 # it does? good. let's move on
 ```
 
-## Output Range {#_output_range}
+## Output Range
 
 ``` python
 from torchtest import test_suite
@@ -125,7 +127,7 @@ test_suite(
 # as expected, it fails; yay!
 ```
 
-## NaN Tensors {#_nan_tensors}
+## NaN Tensors
 
 ``` python
 """ FAILURE """
@@ -138,7 +140,7 @@ test_suite(
     )
 ```
 
-## Inf Tensors {#_inf_tensors}
+## Inf Tensors
 
 ``` python
 """ FAILURE """
@@ -151,7 +153,7 @@ test_suite(
     )
 ```
 
-# Debugging {#_debugging}
+# Debugging
 
 ``` bash
 torchtest\torchtest.py", line 151, in _var_change_helper
@@ -173,7 +175,7 @@ test_suite(
     )
 ```
 
-# Citation {#_citation}
+# Citation
 
 ``` tex
 @misc{Ram2019,
