@@ -21,7 +21,7 @@ Notable changes:
 
 -   Fewer requirements (due to streamlining testing).
 
--   More comprehensive changes.
+-   More comprehensive internal unit tests.
 
 -   This repository is still active. I've created an
     [issue](https://github.com/suriyadeepan/torchtest/issues/6) to
