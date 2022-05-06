@@ -23,10 +23,12 @@ Notable changes:
 
 -   More comprehensive changes.
 
--   Still active? I've created an
+-   This repository is still active. I've created an
     [issue](https://github.com/suriyadeepan/torchtest/issues/6) to
     double check but it looks like the original maintainer is no longer
     actioning pull requests.
+
+---
 
 # Installation
 
