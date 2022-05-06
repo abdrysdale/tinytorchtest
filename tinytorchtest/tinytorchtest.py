@@ -1,4 +1,4 @@
-"""torchtest : A Tiny Test Suite for PyTorch
+"""tinytorchtest : A Tiny Test Suite for PyTorch
 
 A tiny test suite for pytorch based Machine Learning models, inspired by mltest.
 
