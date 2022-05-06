@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "torchtest"
+name = "tinytorchtest"
 version = "0.7.0"
 description = "A tiny test suite for pytorch based machine learning models."
 authors = ["Alex <adrysdale@protonmail.com>"]
