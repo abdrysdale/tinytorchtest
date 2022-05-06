@@ -11,7 +11,7 @@ import torch
 # Local imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from torchtest import torchtest as tt
+from tinytorchtest import tinytorchtest as ttt
 import test_networks
 
 def test_regression():
@@ -19,7 +19,7 @@ def test_regression():
     torch.manual_seed(1)
 
     # Setup test suite
-    tt.setup()
+    ttt.setup()
 
     # Model
     layers = [3, 10, 1]
@@ -35,7 +35,7 @@ def test_regression():
     loss_fn = torch.nn.MSELoss()
 
     # run all tests
-    assert tt.test_suite(
+    assert ttt.test_suite(
         model,
         loss_fn,
         optim,
@@ -50,7 +50,7 @@ def test_regression_multi_args():
     torch.manual_seed(1)
 
     # Setup test suite
-    tt.setup()
+    ttt.setup()
 
     # Model
     layers = [3, 10, 1]
@@ -69,7 +69,7 @@ def test_regression_multi_args():
     loss_fn = torch.nn.MSELoss()
 
     # run all tests
-    assert tt.test_suite(
+    assert ttt.test_suite(
         model,
         loss_fn,
         optim,
@@ -84,7 +84,7 @@ def test_regression_unsupervised():
     torch.manual_seed(1)
 
     # Setup test suite
-    tt.setup()
+    ttt.setup()
 
     # Model
     layers = [3, 10, 1]
@@ -101,7 +101,7 @@ def test_regression_unsupervised():
         return torch.mean(output**2)
 
     # run all tests
-    assert tt.test_suite(
+    assert ttt.test_suite(
         model,
         _loss,
         optim,
