@@ -191,15 +191,15 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
     _train_step(model, loss_fn, optim, batch, device, **kwargs)
 
     # check if variables have changed
-    for (_, p0), (name, p1) in zip(initial_params, params):
+    for (_, param_0), (name, param_1) in zip(initial_params, params):
         try:
             if vars_change:
-                assert not torch.equal(p0.to(device), p1.to(device))
+                assert not torch.equal(param_0.to(device), param_1.to(device))
             else:
-                assert torch.equal(p0.to(device), p1.to(device))
-        except AssertionError:
+                assert torch.equal(param_0.to(device), param_1.to(device))
+        except AssertionError as error:
             msg = 'did not change!' if vars_change else 'changed!'
-            raise VariablesChangeException(f"{name} {msg}")
+            raise VariablesChangeException(f"{name} {msg}") from error
 
 def assert_uses_gpu():
     """Make sure GPU is available and accessible
@@ -212,8 +212,8 @@ def assert_uses_gpu():
 
     try:
         assert torch.cuda.is_available()
-    except AssertionError:
-        raise GpuUnusedException("GPU inaccessible")
+    except AssertionError as error:
+        raise GpuUnusedException("GPU inaccessible") from error
 
 def assert_vars_change(model, loss_fn, optim, batch, device, params=None, **kwargs):
     """Make sure that the given parameters (params) DO change during training
@@ -225,7 +225,7 @@ def assert_vars_change(model, loss_fn, optim, batch, device, params=None, **kwar
     model : torch.nn.Module
         torch model, an instance of torch.nn.Module
     loss_fn : function
-        a loss function from torch.nn.functional 
+        a loss function from torch.nn.functional
     optim : torch.optim.Optimizer
         an optimizer instance
     batch : list
@@ -289,8 +289,8 @@ def assert_any_greater_than(tensor, value):
 
     try:
         assert (tensor > value).byte().any()
-    except AssertionError:
-        raise RangeException(f"All elements of tensor are less than {value}")
+    except AssertionError as error:
+        raise RangeException(f"All elements of tensor are less than {value}") from error
 
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
@@ -310,8 +310,8 @@ def assert_all_greater_than(tensor, value):
 
     try:
         assert (tensor > value).byte().all()
-    except AssertionError:
-        raise RangeException(f"Some elements of tensor are less than {value}")
+    except AssertionError as error:
+        raise RangeException(f"Some elements of tensor are less than {value}") from error
 
 def assert_any_less_than(tensor, value):
     """Make sure that one or more elements of tensor are less than value
@@ -331,8 +331,8 @@ def assert_any_less_than(tensor, value):
 
     try:
         assert (tensor < value).byte().any()
-    except AssertionError:
-        raise RangeException(f"All elements of tensor are greater than {value}")
+    except AssertionError as error:
+        raise RangeException(f"All elements of tensor are greater than {value}") from error
 
 def assert_all_less_than(tensor, value):
     """Make sure that all elements of tensor are less than value
@@ -352,8 +352,8 @@ def assert_all_less_than(tensor, value):
 
     try:
         assert (tensor < value).byte().all()
-    except AssertionError:
-        raise RangeException(f"Some elements of tensor are greater than {value}")
+    except AssertionError as error:
+        raise RangeException(f"Some elements of tensor are greater than {value}") from error
 
 def assert_input_dependency(model, loss_fn, optim, batch,
         independent_vars=None,
@@ -382,8 +382,8 @@ def assert_never_nan(tensor):
 
     try:
         assert not torch.isnan(tensor).byte().any()
-    except AssertionError:
-        raise NaNTensorException("There was a NaN value in tensor")
+    except AssertionError as error:
+        raise NaNTensorException("There was a NaN value in tensor") from error
 
 def assert_never_inf(tensor):
     """Make sure there are no Inf values in the given tensor.
@@ -401,8 +401,8 @@ def assert_never_inf(tensor):
 
     try:
         assert torch.isfinite(tensor).byte().any()
-    except AssertionError:
-        raise InfTensorException("There was an Inf value in tensor")
+    except AssertionError as error:
+        raise InfTensorException("There was an Inf value in tensor") from error
 
 def test_suite(model, loss_fn, optim, batch,
         output_range=None,
