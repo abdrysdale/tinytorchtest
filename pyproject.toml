@@ -4,6 +4,9 @@ version = "0.7.0"
 description = "A tiny test suite for pytorch based machine learning models."
 authors = ["Alex <adrysdale@protonmail.com>"]
 license = "GPL-3.0-or-later"
+repository = "https://github.com/abdrysdale/tinytorchtest"
+readme = "README.md"
+keyowrds = ["pytorch", "torch", "test", "tests", "mltest"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
