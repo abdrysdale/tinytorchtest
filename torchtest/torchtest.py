@@ -78,7 +78,7 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
     model : torch.nn.Module
         torch model, an instance of torch.nn.Module
     loss_fn : function
-        a loss function from torch.nn.functional 
+        a loss function from torch.nn.functional
     optim : torch.optim.Optimizer
         an optimizer instance
     batch : list
@@ -136,7 +136,7 @@ def _forward_step(model, batch, device):
     Returns
     -------
     torch.tensor
-        output of model's forward function 
+        output of model's forward function
     """
 
     # put model in eval mode
@@ -151,7 +151,7 @@ def _forward_step(model, batch, device):
         # forward
         return model(*inputs)
 
-def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None, **kwargs): 
+def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None, **kwargs):
     """Check if given variables (params) change or not during training
 
     If parameters (params) aren't provided, check all parameters.
@@ -163,7 +163,7 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
     model : torch.nn.Module
         torch model, an instance of torch.nn.Module
     loss_fn : function
-        a loss function from torch.nn.functional 
+        a loss function from torch.nn.functional
     optim : torch.optim.Optimizer
         an optimizer instance
     batch : list
@@ -198,12 +198,8 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
             else:
                 assert torch.equal(p0.to(device), p1.to(device))
         except AssertionError:
-            raise VariablesChangeException( # error message
-                    "{var_name} {msg}".format(
-                        var_name=name, 
-                        msg='did not change!' if vars_change else 'changed!' 
-                        )
-                    )
+            msg = 'did not change!' if vars_change else 'changed!'
+            raise VariablesChangeException(f"{name} {msg}")
 
 def assert_uses_gpu():
     """Make sure GPU is available and accessible
@@ -257,7 +253,7 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs
     model : torch.nn.Module
         torch model, an instance of torch.nn.Module
     loss_fn : function
-        a loss function from torch.nn.functional 
+        a loss function from torch.nn.functional
     optim : torch.optim.Optimizer
         an optimizer instance
     batch : list
@@ -281,23 +277,20 @@ def assert_any_greater_than(tensor, value):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
     value : float
         numerical value to check against
 
     Raises
     ------
     RangeException
-        If all elements of tensor are less than value 
+        If all elements of tensor are less than value
     """
 
     try:
         assert (tensor > value).byte().any()
     except AssertionError:
-        raise RangeException(
-                "All elements of tensor are less than {value}".format(
-                    value=value)
-                )
+        raise RangeException(f"All elements of tensor are less than {value}")
 
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
@@ -305,23 +298,20 @@ def assert_all_greater_than(tensor, value):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
     value : float
         numerical value to check against
 
     Raises
     ------
     RangeException
-        If one or more elements of tensor are less than value 
+        If one or more elements of tensor are less than value
     """
 
     try:
         assert (tensor > value).byte().all()
     except AssertionError:
-        raise RangeException(
-                "Some elements of tensor are less than {value}".format(
-                    value=value)
-                )
+        raise RangeException(f"Some elements of tensor are less than {value}")
 
 def assert_any_less_than(tensor, value):
     """Make sure that one or more elements of tensor are less than value
@@ -329,23 +319,20 @@ def assert_any_less_than(tensor, value):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
     value : float
         numerical value to check against
 
     Raises
     ------
     RangeException
-        If all elements of tensor are greater than value 
+        If all elements of tensor are greater than value
     """
 
     try:
         assert (tensor < value).byte().any()
     except AssertionError:
-        raise RangeException(
-                "All elements of tensor are greater than {value}".format(
-                    value=value)
-                )
+        raise RangeException(f"All elements of tensor are greater than {value}")
 
 def assert_all_less_than(tensor, value):
     """Make sure that all elements of tensor are less than value
@@ -353,25 +340,22 @@ def assert_all_less_than(tensor, value):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
     value : float
         numerical value to check against
 
     Raises
     ------
     RangeException
-        If one or more elements of tensor are greater than value 
+        If one or more elements of tensor are greater than value
     """
 
     try:
         assert (tensor < value).byte().all()
     except AssertionError:
-        raise RangeException(
-                "Some elements of tensor are greater than {value}".format(
-                    value=value)
-                )
+        raise RangeException(f"Some elements of tensor are greater than {value}")
 
-def assert_input_dependency(model, loss_fn, optim, batch, 
+def assert_input_dependency(model, loss_fn, optim, batch,
         independent_vars=None,
         dependent_vars=None):
     """Makes sure the "dependent_vars" are dependent on "independent_vars" """
@@ -388,7 +372,7 @@ def assert_never_nan(tensor):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
 
     Raises
     ------
@@ -407,7 +391,7 @@ def assert_never_inf(tensor):
     Parameters
     ----------
     tensor : torch.tensor
-        input tensor 
+        input tensor
 
     Raises
     ------
@@ -434,8 +418,8 @@ def test_suite(model, loss_fn, optim, batch,
 ):
     """Test Suite : Runs the tests enabled by the user
 
-    If output_range is None, output of model is tested against (MODEL_OUT_LOW, 
-    MODEL_OUT_HIGH). 
+    If output_range is None, output of model is tested against (MODEL_OUT_LOW,
+    MODEL_OUT_HIGH).
 
     Parameters
     ----------
