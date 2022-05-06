@@ -1,43 +1,54 @@
-= torchtest
+# Torchtest
 
-A Tiny Test Suite for pytorch based Machine Learning models, inspired by https://github.com/Thenerdstation/mltest/blob/master/mltest/mltest.py[mltest]. 
-Chase Roberts lists out 4 basic tests in his https://medium.com/@keeper6928/mltest-automatically-test-neural-network-models-in-one-function-call-eb6f1fa5019d[medium post] about mltest. 
-torchtest is mostly a pytorch port of mltest(which was written for tensorflow).
+A Tiny Test Suite for pytorch based Machine Learning models, inspired by
+[mltest](https://github.com/Thenerdstation/mltest/blob/master/mltest/mltest.py).
+Chase Roberts lists out 4 basic tests in his [medium
+post](https://medium.com/@keeper6928/mltest-automatically-test-neural-network-models-in-one-function-call-eb6f1fa5019d)
+about mltest. torchtest is mostly a pytorch port of mltest(which was
+written for tensorflow).
 
-Forked from https://github.com/BrianPugh/torchtest[BrainPugh] who forked the repo from https://github.com/suriyadeepan/torchtest[suriyadeepan].
+--- 
+
+Forked from [BrainPugh](https://github.com/BrianPugh/torchtest) who
+forked the repo from
+[suriyadeepan](https://github.com/suriyadeepan/torchtest).
 
 Notable changes:
 
-* Support for models to have multiple positional arguments.
-* Support for unsupervised learning.
-* Fewer requirements (due to streamlining testing).
-* More comprehensive changes.
-* Still active? I've created an https://github.com/suriyadeepan/torchtest/issues/6[issue] to double check but it looks like the original maintainer is no longer actioning pull requests.
+-   Support for models to have multiple positional arguments.
 
-== Installation
+-   Support for unsupervised learning.
 
-[source, bash]
-----
+-   Fewer requirements (due to streamlining testing).
+
+-   More comprehensive changes.
+
+-   This repository is still active. I've created an
+    [issue](https://github.com/suriyadeepan/torchtest/issues/6) to
+    double check but it looks like the original maintainer is no longer
+    actioning pull requests.
+
+---
+
+# Installation
+
+``` bash
 pip install --upgrade torchtest
-----
+```
 
-== Tests
+# Tests
 
-
-[source, python]
-----
+``` python
 # imports for examples
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-----
+```
 
+## Variables Change
 
-=== Variables Change
-
-[source, python]
-----
+``` python
 from torchtest import assert_vars_change
 
 inputs = Variable(torch.randn(20, 20))
@@ -51,133 +62,126 @@ print('Our list of parameters', [ np[0] for np in model.named_parameters() ])
 # do they change after a training step?
 #  let's run a train step and see
 assert_vars_change(
-    model=model, 
-    loss_fn=F.cross_entropy, 
+    model=model,
+    loss_fn=F.cross_entropy,
     optim=torch.optim.Adam(model.parameters()),
     batch=batch)
-----
+```
 
-[source, python]
-----
+``` python
 """ FAILURE """
 # let's try to break this, so the test fails
 params_to_train = [ np[1] for np in model.named_parameters() if np[0] is not 'bias' ]
 # run test now
 assert_vars_change(
-    model=model, 
-    loss_fn=F.cross_entropy, 
+    model=model,
+    loss_fn=F.cross_entropy,
     optim=torch.optim.Adam(params_to_train),
     batch=batch)
 
 # YES! bias did not change
-----
+```
 
+## Variables Don't Change
 
-=== Variables Don't Change
-
-[source, python]
-----
+``` python
 from torchtest import assert_vars_same
 
 # What if bias is not supposed to change, by design?
 #  test to see if bias remains the same after training
 assert_vars_same(
-    model=model, 
-    loss_fn=F.cross_entropy, 
+    model=model,
+    loss_fn=F.cross_entropy,
     optim=torch.optim.Adam(params_to_train),
     batch=batch,
-    params=[('bias', model.bias)] 
+    params=[('bias', model.bias)]
     )
 # it does? good. let's move on
-----
+```
 
-=== Output Range
+## Output Range
 
-[source, python]
-----
+``` python
 from torchtest import test_suite
 
 # NOTE : bias is fixed (not trainable)
 optim = torch.optim.Adam(params_to_train)
 loss_fn=F.cross_entropy
 
-test_suite(model, loss_fn, optim, batch, 
+test_suite(model, loss_fn, optim, batch,
     output_range=(-2, 2),
     test_output_range=True
     )
 
 # seems to work
-----
+```
 
-[source, python]
-----
+``` python
 """ FAILURE """
 #  let's tweak the model to fail the test
 model.bias = nn.Parameter(2 + torch.randn(2, ))
 
 test_suite(
     model,
-    loss_fn, optim, batch, 
+    loss_fn, optim, batch,
     output_range=(-1, 1),
     test_output_range=True
     )
 
 # as expected, it fails; yay!
-----
+```
 
-=== NaN Tensors
+## NaN Tensors
 
-[source, python]
-----
+``` python
 """ FAILURE """
 model.bias = nn.Parameter(float('NaN') * torch.randn(2, ))
 
 test_suite(
     model,
-    loss_fn, optim, batch, 
+    loss_fn, optim, batch,
     test_nan_vals=True
     )
-----
+```
 
-=== Inf Tensors
+## Inf Tensors
 
-[source, python]
-----
+``` python
 """ FAILURE """
 model.bias = nn.Parameter(float('Inf') * torch.randn(2, ))
 
 test_suite(
     model,
-    loss_fn, optim, batch, 
+    loss_fn, optim, batch,
     test_inf_vals=True
     )
-----
+```
 
-== Debugging
+# Debugging
 
-[source, bash]
-----
+``` bash
 torchtest\torchtest.py", line 151, in _var_change_helper
 assert not torch.equal(p0, p1)
 RuntimeError: Expected object of backend CPU but got backend CUDA for argument #2 'other'
-----
+```
 
-When you are making use of a GPU, you should explicitly specify `device=cuda:0`. By default `device` is set to `cpu`. See https://github.com/suriyadeepan/torchtest/issues/1[issue #1] for more information.
+When you are making use of a GPU, you should explicitly specify
+`device=cuda:0`. By default `device` is set to `cpu`. See [issue
+#1](https://github.com/suriyadeepan/torchtest/issues/1) for more
+information.
 
-[source, python]
-----
+``` python
 test_suite(
     model,  # a model moved to GPU
-    loss_fn, optim, batch, 
+    loss_fn, optim, batch,
     test_inf_vals=True,
     device='cuda:0'
     )
-----
+```
 
-== Citation
+# Citation
 
-[source, tex]
-----
+``` tex
 @misc{Ram2019,
   author = {Suriyadeepan Ramamoorthy},
   title = {torchtest},
@@ -187,4 +191,4 @@ test_suite(
   howpublished = {\url{https://github.com/suriyadeepan/torchtest}},
   commit = {42ba442e54e5117de80f761a796fba3589f9b223}
 }
-----
+```
