@@ -64,3 +64,21 @@ class MultiArgRegression(torch.nn.Module):
         """Forward pass"""
         nn_input = torch.cat((arg_1, arg_2), dim=1)
         return self.layers(nn_input)
+
+class SingleArgClassification(torch.nn.Module):
+    """Single argument input (deep) neural network classification network"""
+    def __init__(self, layers):
+        """
+        Parameters
+        ----------
+            layers : list
+                A list of the size of each layer.
+
+        """
+        super().__init__()
+        self.layers = SingleArgRegression(layers)
+        self.activation = torch.sigmoid
+
+    def forward(self, nn_input):
+        """Forward pass"""
+        return self.activation(self.layers(nn_input))

@@ -16,10 +16,9 @@ import test_networks
 
 def test_regression():
     """Tests if a single argument regression trains"""
-    torch.manual_seed(1)
 
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -47,10 +46,8 @@ def test_regression():
 
 def test_regression_multi_args():
     """Tests if a multi argument regression model trains"""
-    torch.manual_seed(1)
-
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -81,10 +78,8 @@ def test_regression_multi_args():
 
 def test_regression_unsupervised():
     """Tests an unsupervised regression problem"""
-    torch.manual_seed(1)
-
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -112,9 +107,40 @@ def test_regression_unsupervised():
         supervised=False,
     )
 
+def test_classification():
+    """Tests a classification network"""
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgClassification(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.zeros(4, 1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.CrossEntropyLoss()
+
+    # Run tests
+    assert ttt.test_suite(
+        model,
+        loss_fn,
+        optim,
+        data,
+        output_range=(0,1),
+        test_inf_vals=True,
+        test_nan_vals=True,
+        test_output_range=True,
+    )
+
 if __name__ == '__main__':
     print("Running tests...")
     test_regression()
     test_regression_multi_args()
     test_regression_unsupervised()
+    test_classification()
     print("Testing complete!")
