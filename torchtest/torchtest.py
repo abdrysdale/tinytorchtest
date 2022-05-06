@@ -36,14 +36,14 @@ def setup(seed=0):
     """Set random seed for torch"""
     torch.manual_seed(seed)
 
-def _pack_batch(x, device):
-    """ Packages object ``x`` into a tuple to be unpacked.
+def _pack_batch(tensor_or_tuple, device):
+    """ Packages object ``tensor_or_tuple`` into a tuple to be unpacked.
 
     Recursively transfers all tensor objects to device
 
     Parameters
     ----------
-    x : torch.Tensor or tuple containing torch.Tensor
+    tensor_or_tuple : torch.Tensor or tuple containing torch.Tensor
     device : str
 
     Returns
@@ -52,19 +52,19 @@ def _pack_batch(x, device):
             positional arguments
     """
 
-    def _helper(x):
-        if isinstance(x, torch.Tensor):
-            x.to(device)
-            return x
+    def _helper(tensor_or_tuple):
+        if isinstance(tensor_or_tuple, torch.Tensor):
+            tensor_or_tuple.to(device)
+            return tensor_or_tuple
 
-        output = [_helper(item) for item in x]
+        output = [_helper(item) for item in tensor_or_tuple]
         return output
 
 
-    if isinstance(x, torch.Tensor):
+    if isinstance(tensor_or_tuple, torch.Tensor):
         # For backwards compatability
-        return (x,)
-    return _helper(x)
+        return (tensor_or_tuple,)
+    return _helper(tensor_or_tuple)
 
 
 def _train_step(model, loss_fn, optim, batch, device, supervised=True):
