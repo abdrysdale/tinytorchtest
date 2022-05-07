@@ -7,19 +7,19 @@ import sys
 
 # Module imports
 import torch
+import pytest
 
 # Local imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from tinytorchtest import tinytorchtest as ttt
 import test_networks
+from tinytorchtest import tinytorchtest as ttt
 
 def test_regression():
     """Tests if a single argument regression trains"""
-    torch.manual_seed(1)
 
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -40,6 +40,7 @@ def test_regression():
         loss_fn,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
@@ -47,10 +48,8 @@ def test_regression():
 
 def test_regression_multi_args():
     """Tests if a multi argument regression model trains"""
-    torch.manual_seed(1)
-
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -74,6 +73,7 @@ def test_regression_multi_args():
         loss_fn,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
@@ -81,10 +81,8 @@ def test_regression_multi_args():
 
 def test_regression_unsupervised():
     """Tests an unsupervised regression problem"""
-    torch.manual_seed(1)
-
     # Setup test suite
-    ttt.setup()
+    ttt.setup(1)
 
     # Model
     layers = [3, 10, 1]
@@ -106,15 +104,221 @@ def test_regression_unsupervised():
         _loss,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
         supervised=False,
     )
 
+def test_classification():
+    """Tests a classification network"""
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgClassification(layers)
+
+    # Data
+    # the multiplying by 100 is used to force the use of the whole output range (from 0 to 1).
+    data = [torch.rand(4, 3) * 100, torch.zeros(4, 1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.CrossEntropyLoss()
+
+    # Run tests (with default output range of [-1, 1])
+    assert ttt.test_suite(
+        model,
+        loss_fn,
+        optim,
+        data,
+        test_inf_vals=True,
+        test_nan_vals=True,
+        test_output_range=True,
+    )
+
+    # Checks below range exception
+    with pytest.raises(ttt.RangeException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            output_range=(0.5,1),
+            test_inf_vals=True,
+            test_nan_vals=True,
+            test_output_range=True,
+        )
+
+    # Checks above range exception
+    with pytest.raises(ttt.RangeException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            output_range=(0, 0.5),
+            test_inf_vals=True,
+            test_nan_vals=True,
+            test_output_range=True,
+        )
+
+def test_params_dont_change():
+    """Tests if parameters don't train"""
+
+    # Sets up the model
+    inputs = torch.rand(20,20)
+    targets = torch.rand(20,2)
+    batch = [inputs, targets]
+    model = torch.nn.Linear(20,2)
+
+    # Avoids training the bias term
+    params_to_train = [ param[1] for param in model.named_parameters() if param[0] != 'bias']
+
+    ttt.setup(1)
+
+    # Checks the bias term changes
+    ttt.test_suite(
+        model=model,
+        loss_fn=torch.nn.functional.cross_entropy,
+        optim=torch.optim.Adam(params_to_train),
+        batch=batch,
+        device="cpu",
+        non_train_vars=[('bias', model.bias)],
+    )
+
+    # Checks an error is raised when checking that all variables change
+    with pytest.raises(ttt.VariablesChangeException):
+        ttt.assert_vars_change(
+            model=model,
+            loss_fn=torch.nn.functional.cross_entropy,
+            optim=torch.optim.Adam(params_to_train),
+            batch=batch,
+            device="cpu",
+            params=[('bias', model.bias)],
+        )
+
+    # Checks an error is  raised when the bias term changes
+    with pytest.raises(ttt.VariablesChangeException):
+        ttt.assert_vars_same(
+            model=model,
+            loss_fn=torch.nn.functional.cross_entropy,
+            optim=torch.optim.Adam(params_to_train),
+            batch=batch,
+            device="cpu",
+            params=list(model.named_parameters()),
+        )
+
+def test_nan_exception():
+
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgRegression(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
+
+    data[0][0, 0] = float('nan')
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
+
+    # run all tests
+    with pytest.raises(ttt.NaNTensorException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            test_nan_vals=True,
+        )
+
+def test_inf_exception():
+
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.InfModel(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
+
+    # run all tests
+    with pytest.raises(ttt.InfTensorException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            test_inf_vals=True,
+        )
+
+def test_gpu():
+
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgRegression(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
+
+    # Checks if the GPU is available
+    # Alternatively, checks an exception is raised
+    if torch.cuda.is_available():
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            test_gpu_available=True,
+        )
+
+    else:
+        with pytest.raises(ttt.GpuUnusedException):
+            assert ttt.test_suite(
+                model,
+                loss_fn,
+                optim,
+                data,
+                test_gpu_available=True,
+            )
+
+
 if __name__ == '__main__':
     print("Running tests...")
     test_regression()
     test_regression_multi_args()
     test_regression_unsupervised()
+    test_classification()
+    test_params_dont_change()
+    test_nan_exception()
+    test_inf_exception()
+    test_gpu()
     print("Testing complete!")
