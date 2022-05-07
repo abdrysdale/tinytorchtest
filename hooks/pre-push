@@ -9,4 +9,6 @@ coverage run --source=${SOURCE_DIR} -m pytest
 coverage-badge -f -o ${COVERAGE_SVG}
 
 git add ${COVERAGE_SVG}
-git ci -m "Updated coverage badge"
+git commit -m "Updated coverage badge"
+
+exit 0
