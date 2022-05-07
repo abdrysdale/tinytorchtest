@@ -245,6 +245,44 @@ def test_inf_exception():
             test_inf_vals=True,
         )
 
+def test_gpu():
+
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.SingleArgRegression(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
+
+    # Checks if the GPU is available
+    # Alternatively, checks an exception is raised
+    if torch.cuda.is_available():
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            test_gpu_available=True,
+        )
+
+    else:
+        with pytest.raises(ttt.GpuUnusedException):
+            assert ttt.test_suite(
+                model,
+                loss_fn,
+                optim,
+                data,
+                test_gpu_available=True,
+            )
 
 
 if __name__ == '__main__':
@@ -256,4 +294,5 @@ if __name__ == '__main__':
     test_params_dont_change()
     test_nan_exception()
     test_inf_exception()
+    test_gpu()
     print("Testing complete!")
