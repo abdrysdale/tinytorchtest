@@ -142,7 +142,7 @@ def test_classification():
         test_output_range=True,
     )
 
-    # Checks range exception
+    # Checks below range exception
     with pytest.raises(ttt.RangeException):
         assert ttt.test_suite(
             model,
@@ -150,6 +150,19 @@ def test_classification():
             optim,
             data,
             output_range=(0.5,1),
+            test_inf_vals=True,
+            test_nan_vals=True,
+            test_output_range=True,
+        )
+
+    # Checks above range exception
+    with pytest.raises(ttt.RangeException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            output_range=(0, 0.5),
             test_inf_vals=True,
             test_nan_vals=True,
             test_output_range=True,
@@ -170,13 +183,13 @@ def test_params_dont_change():
     ttt.setup(1)
 
     # Checks the bias term changes
-    ttt.assert_vars_same(
+    ttt.test_suite(
         model=model,
         loss_fn=torch.nn.functional.cross_entropy,
         optim=torch.optim.Adam(params_to_train),
         batch=batch,
         device="cpu",
-        params=[('bias', model.bias)],
+        non_train_vars=[('bias', model.bias)],
     )
 
     # Checks an error is raised when checking that all variables change
