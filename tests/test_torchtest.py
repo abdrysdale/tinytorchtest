@@ -214,10 +214,35 @@ def test_nan_exception():
             loss_fn,
             optim,
             data,
-            train_vars=list(model.named_parameters()),
-            test_vars_change=True,
-            test_inf_vals=True,
             test_nan_vals=True,
+        )
+
+def test_inf_exception():
+
+    # Setup test suite
+    ttt.setup(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.InfModel(layers)
+
+    # Data
+    data = [torch.rand(4, 3), torch.rand(4,1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    loss_fn = torch.nn.MSELoss()
+
+    # run all tests
+    with pytest.raises(ttt.InfTensorException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            test_inf_vals=True,
         )
 
 
@@ -230,4 +255,5 @@ if __name__ == '__main__':
     test_classification()
     test_params_dont_change()
     test_nan_exception()
+    test_inf_exception()
     print("Testing complete!")

@@ -82,3 +82,21 @@ class SingleArgClassification(torch.nn.Module):
     def forward(self, nn_input):
         """Forward pass"""
         return self.activation(self.layers(nn_input))
+
+class InfModel(torch.nn.Module):
+    """Model that always returns infinite"""
+    def __init__(self, layers):
+        """
+        Parameters
+        ----------
+            layers : list
+                A list of the size of each layer.
+
+        """
+        super().__init__()
+        self.layers = SingleArgRegression(layers)
+
+    def forward(self, nn_input):
+        """Forward pass"""
+        output = self.layers(nn_input) * float('inf')
+        return output
