@@ -168,6 +168,7 @@ def test_params_dont_change():
 
     ttt.setup(1)
 
+    # Checks the bias term changes
     ttt.assert_vars_same(
         model=model,
         loss_fn=torch.nn.functional.cross_entropy,
@@ -177,6 +178,18 @@ def test_params_dont_change():
         params=[('bias', model.bias)],
     )
 
+    # Checks an error is raised when checking that all variables change
+    with pytest.raises(ttt.VariablesChangeException):
+        ttt.assert_vars_change(
+            model=model,
+            loss_fn=torch.nn.functional.cross_entropy,
+            optim=torch.optim.Adam(params_to_train),
+            batch=batch,
+            device="cpu",
+            params=[('bias', model.bias)],
+        )
+
+    # Checks an error is  raised when the bias term changes
     with pytest.raises(ttt.VariablesChangeException):
         ttt.assert_vars_same(
             model=model,
