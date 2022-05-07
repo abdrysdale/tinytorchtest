@@ -141,6 +141,19 @@ def test_classification():
         test_output_range=True,
     )
 
+    # Checks range exception
+    with pytest.raises(ttt.RangeException):
+        assert ttt.test_suite(
+            model,
+            loss_fn,
+            optim,
+            data,
+            output_range=(1,2),
+            test_inf_vals=True,
+            test_nan_vals=True,
+            test_output_range=True,
+        )
+
 def test_params_dont_change():
     """Tests if parameters don't train"""
 
