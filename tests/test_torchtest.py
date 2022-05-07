@@ -11,8 +11,8 @@ import torch
 # Local imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_DIR)
-from tinytorchtest import tinytorchtest as ttt
 import test_networks
+from tinytorchtest import tinytorchtest as ttt
 
 def test_regression():
     """Tests if a single argument regression trains"""
@@ -39,6 +39,7 @@ def test_regression():
         loss_fn,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
@@ -71,6 +72,7 @@ def test_regression_multi_args():
         loss_fn,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
@@ -101,6 +103,7 @@ def test_regression_unsupervised():
         _loss,
         optim,
         data,
+        train_vars=list(model.named_parameters()),
         test_vars_change=True,
         test_inf_vals=True,
         test_nan_vals=True,
