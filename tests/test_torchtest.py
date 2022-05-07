@@ -130,13 +130,12 @@ def test_classification():
     # Loss
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    # Run tests
+    # Run tests (with default output range of [-1, 1])
     assert ttt.test_suite(
         model,
         loss_fn,
         optim,
         data,
-        output_range=(0,1),
         test_inf_vals=True,
         test_nan_vals=True,
         test_output_range=True,

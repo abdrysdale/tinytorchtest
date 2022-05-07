@@ -350,7 +350,7 @@ def assert_never_inf(tensor):
         raise InfTensorException("There was an Inf value in tensor") from error
 
 def test_suite(model, loss_fn, optim, batch,
-        output_range=None,
+        output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
         train_vars=None,
         non_train_vars=None,
         test_output_range=False,
@@ -429,12 +429,8 @@ def test_suite(model, loss_fn, optim, batch,
 
     # range tests
     if test_output_range:
-        if output_range is None:
-            assert_all_greater_than(model_out, MODEL_OUT_LOW)
-            assert_all_less_than(model_out, MODEL_OUT_HIGH)
-        else:
-            assert_all_greater_than(model_out, output_range[0])
-            assert_all_less_than(model_out, output_range[1])
+        assert_all_greater_than(model_out, output_range[0])
+        assert_all_less_than(model_out, output_range[1])
 
     # NaN Test
     if test_nan_vals:
