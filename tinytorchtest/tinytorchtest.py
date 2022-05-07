@@ -23,9 +23,6 @@ class VariablesChangeException(Exception): # pylint: disable=missing-class-docst
 class RangeException(Exception): # pylint: disable=missing-class-docstring
     pass
 
-class DependencyException(Exception): # pylint: disable=missing-class-docstring
-    pass
-
 class NaNTensorException(Exception): # pylint: disable=missing-class-docstring
     pass
 
@@ -354,16 +351,6 @@ def assert_all_less_than(tensor, value):
         assert (tensor < value).byte().all()
     except AssertionError as error:
         raise RangeException(f"Some elements of tensor are greater than {value}") from error
-
-def assert_input_dependency(model, loss_fn, optim, batch,
-        independent_vars=None,
-        dependent_vars=None):
-    """Makes sure the "dependent_vars" are dependent on "independent_vars" """
-    raise NotImplementedError("""
-        I don't know a clean way to do this
-        Doesn't assert_vars_change() cover this?
-    """
-    )
 
 
 def assert_never_nan(tensor):
