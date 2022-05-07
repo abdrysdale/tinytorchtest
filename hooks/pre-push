@@ -1,0 +1,12 @@
+#! /usr/bin/env sh
+
+SOURCE_DIR="tinytorchtest/"
+COVERAGE_SVG=".coverage.svg"
+
+# Gets coverage badge
+coverage erase
+coverage run --source=${SOURCE_DIR} -m pytest
+coverage-badge -f -o ${COVERAGE_SVG}
+
+git add ${COVERAGE_SVG}
+git ci -m "Updated coverage badge"
