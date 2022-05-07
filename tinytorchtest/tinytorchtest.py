@@ -1,4 +1,4 @@
-"""torchtest : A Tiny Test Suite for PyTorch
+"""tinytorchtest : A Tiny Test Suite for PyTorch
 
 A tiny test suite for pytorch based Machine Learning models, inspired by mltest.
 
@@ -21,9 +21,6 @@ class VariablesChangeException(Exception): # pylint: disable=missing-class-docst
     pass
 
 class RangeException(Exception): # pylint: disable=missing-class-docstring
-    pass
-
-class DependencyException(Exception): # pylint: disable=missing-class-docstring
     pass
 
 class NaNTensorException(Exception): # pylint: disable=missing-class-docstring
@@ -271,27 +268,6 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs
 
     _var_change_helper(False, model, loss_fn, optim, batch, device, params, **kwargs)
 
-def assert_any_greater_than(tensor, value):
-    """Make sure that one or more elements of tensor greater than value
-
-    Parameters
-    ----------
-    tensor : torch.tensor
-        input tensor
-    value : float
-        numerical value to check against
-
-    Raises
-    ------
-    RangeException
-        If all elements of tensor are less than value
-    """
-
-    try:
-        assert (tensor > value).byte().any()
-    except AssertionError as error:
-        raise RangeException(f"All elements of tensor are less than {value}") from error
-
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
 
@@ -313,27 +289,6 @@ def assert_all_greater_than(tensor, value):
     except AssertionError as error:
         raise RangeException(f"Some elements of tensor are less than {value}") from error
 
-def assert_any_less_than(tensor, value):
-    """Make sure that one or more elements of tensor are less than value
-
-    Parameters
-    ----------
-    tensor : torch.tensor
-        input tensor
-    value : float
-        numerical value to check against
-
-    Raises
-    ------
-    RangeException
-        If all elements of tensor are greater than value
-    """
-
-    try:
-        assert (tensor < value).byte().any()
-    except AssertionError as error:
-        raise RangeException(f"All elements of tensor are greater than {value}") from error
-
 def assert_all_less_than(tensor, value):
     """Make sure that all elements of tensor are less than value
 
@@ -354,16 +309,6 @@ def assert_all_less_than(tensor, value):
         assert (tensor < value).byte().all()
     except AssertionError as error:
         raise RangeException(f"Some elements of tensor are greater than {value}") from error
-
-def assert_input_dependency(model, loss_fn, optim, batch,
-        independent_vars=None,
-        dependent_vars=None):
-    """Makes sure the "dependent_vars" are dependent on "independent_vars" """
-    raise NotImplementedError("""
-        I don't know a clean way to do this
-        Doesn't assert_vars_change() cover this?
-    """
-    )
 
 
 def assert_never_nan(tensor):
@@ -405,7 +350,7 @@ def assert_never_inf(tensor):
         raise InfTensorException("There was an Inf value in tensor") from error
 
 def test_suite(model, loss_fn, optim, batch,
-        output_range=None,
+        output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
         train_vars=None,
         non_train_vars=None,
         test_output_range=False,
@@ -484,12 +429,8 @@ def test_suite(model, loss_fn, optim, batch,
 
     # range tests
     if test_output_range:
-        if output_range is None:
-            assert_all_greater_than(model_out, MODEL_OUT_LOW)
-            assert_all_less_than(model_out, MODEL_OUT_HIGH)
-        else:
-            assert_all_greater_than(model_out, output_range[0])
-            assert_all_less_than(model_out, output_range[1])
+        assert_all_greater_than(model_out, output_range[0])
+        assert_all_less_than(model_out, output_range[1])
 
     # NaN Test
     if test_nan_vals:
