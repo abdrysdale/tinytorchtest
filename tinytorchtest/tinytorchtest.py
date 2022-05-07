@@ -268,27 +268,6 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs
 
     _var_change_helper(False, model, loss_fn, optim, batch, device, params, **kwargs)
 
-def assert_any_greater_than(tensor, value):
-    """Make sure that one or more elements of tensor greater than value
-
-    Parameters
-    ----------
-    tensor : torch.tensor
-        input tensor
-    value : float
-        numerical value to check against
-
-    Raises
-    ------
-    RangeException
-        If all elements of tensor are less than value
-    """
-
-    try:
-        assert (tensor > value).byte().any()
-    except AssertionError as error:
-        raise RangeException(f"All elements of tensor are less than {value}") from error
-
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
 
@@ -309,27 +288,6 @@ def assert_all_greater_than(tensor, value):
         assert (tensor > value).byte().all()
     except AssertionError as error:
         raise RangeException(f"Some elements of tensor are less than {value}") from error
-
-def assert_any_less_than(tensor, value):
-    """Make sure that one or more elements of tensor are less than value
-
-    Parameters
-    ----------
-    tensor : torch.tensor
-        input tensor
-    value : float
-        numerical value to check against
-
-    Raises
-    ------
-    RangeException
-        If all elements of tensor are greater than value
-    """
-
-    try:
-        assert (tensor < value).byte().any()
-    except AssertionError as error:
-        raise RangeException(f"All elements of tensor are greater than {value}") from error
 
 def assert_all_less_than(tensor, value):
     """Make sure that all elements of tensor are less than value

@@ -121,7 +121,8 @@ def test_classification():
     model = test_networks.SingleArgClassification(layers)
 
     # Data
-    data = [torch.rand(4, 3), torch.zeros(4, 1)]
+    # the multiplying by 100 is used to force the use of the whole output range (from 0 to 1).
+    data = [torch.rand(4, 3) * 100, torch.zeros(4, 1)]
 
     # Optimiser
     optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
@@ -148,7 +149,7 @@ def test_classification():
             loss_fn,
             optim,
             data,
-            output_range=(1,2),
+            output_range=(0.5,1),
             test_inf_vals=True,
             test_nan_vals=True,
             test_output_range=True,
