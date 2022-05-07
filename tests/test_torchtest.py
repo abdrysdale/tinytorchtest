@@ -137,10 +137,34 @@ def test_classification():
         test_output_range=True,
     )
 
+def test_params_dont_change():
+    """Tests if parameters don't train"""
+
+    # Sets up the model
+    inputs = torch.rand(20,20)
+    targets = torch.rand(20,2)
+    batch = [inputs, targets]
+    model = torch.nn.Linear(20,2)
+
+    # Avoids training the bias term
+    params_to_train = [ param[1] for param in model.named_parameters() if param[0] != 'bias']
+
+    ttt.setup(1)
+
+    ttt.assert_vars_same(
+        model=model,
+        loss_fn=torch.nn.functional.cross_entropy,
+        optim=torch.optim.Adam(params_to_train),
+        batch=batch,
+        device="cpu",
+        params=[('bias', model.bias)],
+    )
+
 if __name__ == '__main__':
     print("Running tests...")
     test_regression()
     test_regression_multi_args()
     test_regression_unsupervised()
     test_classification()
+    test_params_dont_change()
     print("Testing complete!")
