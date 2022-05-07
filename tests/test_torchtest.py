@@ -7,6 +7,7 @@ import sys
 
 # Module imports
 import torch
+import pytest
 
 # Local imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -162,6 +163,16 @@ def test_params_dont_change():
         device="cpu",
         params=[('bias', model.bias)],
     )
+
+    with pytest.raises(ttt.VariablesChangeException):
+        ttt.assert_vars_same(
+            model=model,
+            loss_fn=torch.nn.functional.cross_entropy,
+            optim=torch.optim.Adam(params_to_train),
+            batch=batch,
+            device="cpu",
+            params=list(model.named_parameters()),
+        )
 
 if __name__ == '__main__':
     print("Running tests...")
