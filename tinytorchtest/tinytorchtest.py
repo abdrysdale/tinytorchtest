@@ -29,6 +29,53 @@ class NaNTensorException(Exception): # pylint: disable=missing-class-docstring
 class InfTensorException(Exception): # pylint: disable=missing-class-docstring
     pass
 
+class TinyTorchTest():
+    """Class for the tiny torch testing suite"""
+    def __init__(
+        self,
+        model,
+        loss_fn,
+        optim,
+        batch,
+        device="cpu",
+        supervised=True,
+        seed=42,
+    ):
+        """
+        Parameters
+        ----------
+        model : torch.nn.Module
+            torch model, an instance of torch.nn.Module
+        loss_fn : function
+            a loss function from torch.nn.functional
+        optim : torch.optim.Optimizer
+            an optimizer instance
+        batch : list
+            a 2 element list of inputs and labels, to be fed to the model
+        device : str
+            Device to load model and data on to. Defaults to "cpu".
+        supervised : bool
+            True for supervised learning models. False otherwise.
+            Defaults to True.
+        seed : int
+            Seed for torch manual seed. Will manually set seed before each test.
+            Defaults to 42.
+        """
+        self.model = model
+        self.loss_fn = loss_fn
+        self.optim = optim
+        self.batch = batch
+        self.device = device
+        self.supervised = supervised
+        self.seed = seed
+
+    def _seed(self, seed=None):
+        """Sets the seed"""
+        if isinstance(seed, type(None)):
+            seed = self.seed
+        torch.manual_seed(seed)
+
+
 def setup(seed=0):
     """Set random seed for torch"""
     torch.manual_seed(seed)
