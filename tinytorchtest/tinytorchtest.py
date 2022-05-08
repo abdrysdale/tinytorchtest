@@ -113,6 +113,21 @@ class TinyTorchTest():
 			supervised=self.supervised,
         )
 
+    def test_output_range(self, model_out, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
+        """Checks if the output is within the range
+
+        Parameters
+        ----------
+
+        model_out : tensor
+            Output from a single model forward step.
+        output_range : tuple, optional
+            (low, high) tuple to check against the range of logits. 
+            Defaults to (MODEL_OUT_LOW, MODEL_OUT_HIGH).
+        """
+        assert_all_greater_than(model_out, output_range[0])
+        assert_all_less_than(model_out, output_range[1])
+
 
 def setup(seed=0):
     """Set random seed for torch"""
