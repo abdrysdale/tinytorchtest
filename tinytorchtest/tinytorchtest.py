@@ -164,6 +164,10 @@ class TinyTorchTest():
             model_out = self._forward_step()
         assert_never_inf(model_out)
 
+    def test_gpu_available(self): # pylint: disable=no-self-use
+        """Tests the GPU availability"""
+        assert_uses_gpu()
+
 
     def test( # pylint: disable=too-many-arguments
         self,
