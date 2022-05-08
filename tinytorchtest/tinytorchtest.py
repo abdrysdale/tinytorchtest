@@ -29,9 +29,233 @@ class NaNTensorException(Exception): # pylint: disable=missing-class-docstring
 class InfTensorException(Exception): # pylint: disable=missing-class-docstring
     pass
 
-def setup(seed=0):
-    """Set random seed for torch"""
-    torch.manual_seed(seed)
+class TinyTorchTest():
+    """Class for the tiny torch testing suite"""
+    def __init__(
+        self,
+        model,
+        loss_fn,
+        optim,
+        batch,
+        device="cpu",
+        supervised=True,
+        seed=42,
+    ):
+        """
+        Parameters
+        ----------
+        model : torch.nn.Module
+            torch model, an instance of torch.nn.Module
+        loss_fn : function
+            a loss function from torch.nn.functional
+        optim : torch.optim.Optimizer
+            an optimizer instance
+        batch : list
+            a 2 element list of inputs and labels, to be fed to the model
+        device : str
+            Device to load model and data on to. Defaults to "cpu".
+        supervised : bool
+            True for supervised learning models. False otherwise.
+            Defaults to True.
+        seed : int
+            Seed for torch manual seed. Will manually set seed before each test.
+            Defaults to 42.
+        """
+        self.model = model
+        self.loss_fn = loss_fn
+        self.optim = optim
+        self.batch = batch
+        self.device = device
+        self.supervised = supervised
+        self.seed = seed
+
+    def _seed(self, seed=None):
+        """Sets the seed"""
+        if isinstance(seed, type(None)):
+            seed = self.seed
+        torch.manual_seed(seed)
+
+    def assert_vars_change(self, params=None):
+        """Asserts if variables change
+
+        Parameters
+        ----------
+
+        params : list, optional
+            list of parameters of form (name, variable)
+        """
+        self._seed()
+        return assert_vars_change(
+            self.model,
+			self.loss_fn,
+			self.optim,
+			self.batch,
+			self.device,
+            params=params,
+			supervised=self.supervised,
+        )
+
+    def assert_vars_same(self, params=None):
+        """Asserts if variables don't change
+
+        Parameters
+        ----------
+
+        params : list, optional
+            list of parameters of form (name, variable)
+        """
+        self._seed()
+        return assert_vars_same(
+            self.model,
+			self.loss_fn,
+			self.optim,
+			self.batch,
+			self.device,
+            params=params,
+			supervised=self.supervised,
+        )
+
+
+    def _forward_step(self):
+        """Returns one forward step of the model"""
+        self._seed()
+        return _forward_step(self.model, self.batch, self.device)
+
+
+    def test_output_range(self, model_out=None, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
+        """Checks if the output is within the range
+
+        Parameters
+        ----------
+        output_range : tuple, optional
+            (low, high) tuple to check against the range of logits.
+            Defaults to (MODEL_OUT_LOW, MODEL_OUT_HIGH).
+        """
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
+        assert_all_greater_than(model_out, output_range[0])
+        assert_all_less_than(model_out, output_range[1])
+
+
+    def test_nan_vals(self, model_out=None):
+        """Tests NaN values
+
+        Parameters
+        ----------
+            model_out : tensor, optional
+                If None, gets model output by running forward pass.
+                Defaults to None.
+        """
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
+        assert_never_nan(model_out)
+
+
+    def test_inf_vals(self, model_out=None):
+        """Tests Inf values
+
+        Parameters
+        ----------
+            model_out : tensor, optional
+                If None, gets model output by running forward pass.
+                Defaults to None.
+        """
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
+        assert_never_inf(model_out)
+
+    def test_gpu_available(self): # pylint: disable=no-self-use
+        """Tests the GPU availability"""
+        assert_uses_gpu()
+
+
+    def test( # pylint: disable=too-many-arguments
+        self,
+        output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
+        train_vars=None,
+        non_train_vars=None,
+        test_output_range=False,
+        test_vars_change=False,
+        test_nan_vals=False,
+        test_inf_vals=False,
+        test_gpu_available=False,
+    ):
+        """Test Suite : Runs the tests enabled by the user
+
+        If output_range is None, output of model is tested against (MODEL_OUT_LOW,
+        MODEL_OUT_HIGH).
+
+        Parameters
+        ----------
+        output_range : tuple, optional
+            (low, high) tuple to check against the range of logits (default is
+            None)
+        train_vars : list, optional
+            list of parameters of form (name, variable) to check if they change
+            during training (default is None)
+        non_train_vars : list, optioal
+            list of parameters of form (name, variable) to check if they DO NOT
+            change during training (default is None)
+        test_output_range : boolean, optional
+            switch to turn on or off range test (default is False)
+        test_vars_change : boolean, optional
+            switch to turn on or off variables change test (default is False)
+        test_nan_vals : boolean, optional
+            switch to turn on or off test for presence of NaN values (default is False)
+        test_inf_vals : boolean, optional
+            switch to turn on or off test for presence of Inf values (default is False)
+        test_gpu_available : boolean, optional
+            switch to turn on or off GPU availability test (default is False)
+
+        Raises
+        ------
+        VariablesChangeException
+            If selected params change/do not change during training
+        RangeException
+            If range of output exceeds the given limit
+        GpuUnusedException
+            If GPU is inaccessible
+        NaNTensorException
+            If one or more NaN values occur in model output
+        InfTensorException
+            If one or more Inf values occur in model output
+        """
+
+        self._seed()
+
+        # Check if all variables change
+        if test_vars_change:
+            self.assert_vars_change()
+
+        # Check if train_vars change
+        if train_vars is not None:
+            self.assert_vars_change(params=train_vars)
+
+        # Check if non_train_vars don't change
+        if non_train_vars is not None:
+            self.assert_vars_same(params=non_train_vars)
+
+        # Gets an output of the model
+        model_out = self._forward_step()
+
+        # Tests output range
+        if test_output_range:
+            self.test_output_range(model_out=model_out, output_range=output_range)
+
+        # NaN Test
+        if test_nan_vals:
+            self.test_nan_vals(model_out=model_out)
+
+        # Inf Test
+        if test_inf_vals:
+            self.test_inf_vals(model_out=model_out)
+
+        # GPU test
+        if test_gpu_available:
+            self.test_gpu_available()
+
+        return True
+
 
 def _pack_batch(tensor_or_tuple, device):
     """ Packages object ``tensor_or_tuple`` into a tuple to be unpacked.
@@ -348,100 +572,3 @@ def assert_never_inf(tensor):
         assert torch.isfinite(tensor).byte().any()
     except AssertionError as error:
         raise InfTensorException("There was an Inf value in tensor") from error
-
-def test_suite(model, loss_fn, optim, batch,
-        output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
-        train_vars=None,
-        non_train_vars=None,
-        test_output_range=False,
-        test_vars_change=False,
-        test_nan_vals=False,
-        test_inf_vals=False,
-        test_gpu_available=False,
-        device='cpu',
-        **kwargs,
-):
-    """Test Suite : Runs the tests enabled by the user
-
-    If output_range is None, output of model is tested against (MODEL_OUT_LOW,
-    MODEL_OUT_HIGH).
-
-    Parameters
-    ----------
-    model : torch.nn.Module
-        torch model, an instance of torch.nn.Module
-    loss_fn : function
-        a loss function from torch.nn.functional
-    optim : torch.optim.Optimizer
-        an optimizer instance
-    batch : list
-        a 2 element list of inputs and labels, to be fed to the model
-    output_range : tuple, optional
-        (low, high) tuple to check against the range of logits (default is
-        None)
-    train_vars : list, optional
-        list of parameters of form (name, variable) to check if they change
-        during training (default is None)
-    non_train_vars : list, optioal
-        list of parameters of form (name, variable) to check if they DO NOT
-        change during training (default is None)
-    test_output_range : boolean, optional
-        switch to turn on or off range test (default is False)
-    test_vars_change : boolean, optional
-        switch to turn on or off variables change test (default is False)
-    test_nan_vals : boolean, optional
-        switch to turn on or off test for presence of NaN values (default is False)
-    test_inf_vals : boolean, optional
-        switch to turn on or off test for presence of Inf values (default is False)
-    test_gpu_available : boolean, optional
-        switch to turn on or off GPU availability test (default is False)
-    **kwarg supervised : bool
-        True for supervised learning models. False otherwise.
-
-    Raises
-    ------
-    VariablesChangeException
-        If selected params change/do not change during training
-    RangeException
-        If range of output exceeds the given limit
-    GpuUnusedException
-        If GPU is inaccessible
-    NaNTensorException
-        If one or more NaN values occur in model output
-    InfTensorException
-        If one or more Inf values occur in model output
-    """
-
-    # check if all variables change
-    if test_vars_change:
-        assert_vars_change(model, loss_fn, optim, batch, device, **kwargs)
-
-    # check if train_vars change
-    if train_vars is not None:
-        assert_vars_change(model, loss_fn, optim, batch, device, params=train_vars, **kwargs)
-
-    # check if non_train_vars don't change
-    if non_train_vars is not None:
-        assert_vars_same(model, loss_fn, optim, batch, device, params=non_train_vars, **kwargs)
-
-    # run forward once
-    model_out = _forward_step(model, batch, device)
-
-    # range tests
-    if test_output_range:
-        assert_all_greater_than(model_out, output_range[0])
-        assert_all_less_than(model_out, output_range[1])
-
-    # NaN Test
-    if test_nan_vals:
-        assert_never_nan(model_out)
-
-    # Inf Test
-    if test_inf_vals:
-        assert_never_inf(model_out)
-
-    # GPU test
-    if test_gpu_available:
-        assert_uses_gpu()
-
-    return True
