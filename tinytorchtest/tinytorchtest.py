@@ -252,7 +252,7 @@ class TinyTorchTest():
 
         # GPU test
         if test_gpu_available:
-            assert_uses_gpu()
+            self.test_gpu_available()
 
         return True
 
