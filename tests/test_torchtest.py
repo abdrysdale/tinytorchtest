@@ -18,6 +18,9 @@ from tinytorchtest import tinytorchtest as ttt
 def test_regression():
     """Tests if a single argument regression trains"""
 
+    # Sets random seed
+    torch.manual_seed(1)
+
     # Model
     layers = [3, 10, 1]
     model = test_networks.SingleArgRegression(layers)
@@ -44,6 +47,9 @@ def test_regression():
 
 def test_regression_multi_args():
     """Tests if a multi argument regression model trains"""
+
+    # Sets random seed
+    torch.manual_seed(1)
 
     # Model
     layers = [3, 10, 1]
@@ -73,8 +79,9 @@ def test_regression_multi_args():
 
 def test_regression_unsupervised():
     """Tests an unsupervised regression problem"""
-    # Setup test suite
-    ttt.setup(1)
+
+    # Sets random seed
+    torch.manual_seed(1)
 
     # Model
     layers = [3, 10, 1]
@@ -104,6 +111,9 @@ def test_regression_unsupervised():
 def test_classification():
     """Tests a classification network"""
 
+    # Sets random seed
+    torch.manual_seed(1)
+
     # Model
     layers = [3, 10, 1]
     model = test_networks.SingleArgClassification(layers)
@@ -121,33 +131,22 @@ def test_classification():
     # Setup test suite
     test = ttt.TinyTorchTest(model, loss_fn, optim, batch)
 
-    test.test(
-        test_inf_vals=True,
-        test_nan_vals=True,
-        test_output_range=True,
-    )
+    test.test(test_output_range=True)
 
     # Checks below range exception
     with pytest.raises(ttt.RangeException):
-        test.test(
-            output_range=(0.5,1),
-            test_inf_vals=True,
-            test_nan_vals=True,
-            test_output_range=True,
-        )
+        test.test(output_range=(0.5,1), test_output_range=True)
 
     # Checks above range exception
     with pytest.raises(ttt.RangeException):
-        test.test(
-            output_range=(0, 0.5),
-            test_inf_vals=True,
-            test_nan_vals=True,
-            test_output_range=True,
-        )
+        test.test(output_range=(0, 0.5), test_output_range=True)
 
 
 def test_params_dont_change():
     """Tests if parameters don't train"""
+
+    # Sets seed
+    torch.manual_seed(1)
 
     # Sets up the model
     inputs = torch.rand(20,20)
@@ -185,6 +184,10 @@ def test_params_dont_change():
 
 
 def test_nan_exception():
+    """Tests for NaN exception"""
+
+    # Sets seed
+    torch.manual_seed(1)
 
     # Model
     layers = [3, 10, 1]
@@ -214,6 +217,10 @@ def test_nan_exception():
         test.test(test_nan_vals=True,)
 
 def test_inf_exception():
+    """Tests for inf exception"""
+
+    # Sets seed
+    torch.manual_seed(1)
 
     # Model
     layers = [3, 10, 1]
@@ -241,9 +248,7 @@ def test_inf_exception():
         test.test(test_inf_vals=True)
 
 def test_gpu():
-
-    # Setup test suite
-    ttt.setup(1)
+    """Tests for GPU exception"""
 
     # Model
     layers = [3, 10, 1]
