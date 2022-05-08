@@ -84,6 +84,7 @@ class TinyTorchTest():
         params : list, optional
             list of parameters of form (name, variable)
         """
+        self._seed()
         return assert_vars_change(
             self.model,
 			self.loss_fn,
@@ -103,6 +104,7 @@ class TinyTorchTest():
         params : list, optional
             list of parameters of form (name, variable)
         """
+        self._seed()
         return assert_vars_same(
             self.model,
 			self.loss_fn,
@@ -115,7 +117,22 @@ class TinyTorchTest():
 
     def _forward_step(self):
         """Returns one forward step of the model"""
+        self._seed()
         return _forward_step(self.model, self.batch, self.device)
+
+
+    def test_output_range(self, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
+        """Checks if the output is within the range
+
+        Parameters
+        ----------
+        output_range : tuple, optional
+            (low, high) tuple to check against the range of logits.
+            Defaults to (MODEL_OUT_LOW, MODEL_OUT_HIGH).
+        """
+        model_out = self._forward_step()
+        assert_all_greater_than(model_out, output_range[0])
+        assert_all_less_than(model_out, output_range[1])
 
 
     def test(
