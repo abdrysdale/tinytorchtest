@@ -45,10 +45,42 @@ pip install --upgrade tinytorchtest
 # Usage
 
 ``` python
-# imports for examples
+# Imports for examples
 import torch
-import torch.nn as nn
 ```
+
+## Quick Start
+
+``` python
+# Import the library
+from tinytorchtest import tinytorchtest as ttt
+
+# Get the tiny test object
+test = ttt.TinyTorchTest(
+	my_unsupervised_classification_model,	# Model
+	my_loss_function,						# Loss function
+	my_optimiser,							# Pytorch optimiser
+	my_batch,								# Batch of data
+	device="cuda:0",						# Device to load tensors to (defaults to "cpu")
+	supervised=False,						# As this model is an unsupervised (defaults to True).
+	seed=314,								# Testing seed (defaults to 42).
+)
+
+# Run the tests
+test.test(
+	output_range=(0, 1), 		# Checks the model output always falls within a range.
+	train_vars=var_list_1,		# Checks that this list of vars changes during training.
+	non_train_vars=var_list_2, 	# Checks that this list of vars doesn't change during training.
+	test_output_range=True,		# This is need to actually test the output range.
+	test_vars_change=True,		# This tests if all model parameters change during training.
+	test_nan_vals=True,			# Checks if any NaN values are predicted by the model.
+	test_inf_vals=True,			# Checks if any Inf values are predicted by the model.
+	test_gpu_available=True,	# Checks if the GPU is available.
+)
+# Done.
+```
+
+See the below sections for a more detailed guide.
 
 ## Variables Change
 
@@ -56,7 +88,7 @@ import torch.nn as nn
 from tinytorchtest import tinytorchtest as ttt
 
 # We'll be using a simple linear model
-model = nn.Linear(20, 2)
+model = torch.nn.Linear(20, 2)
 
 # For this example, we'll pretend we have a classification problem
 # and create some random inputs and outputs.
@@ -65,7 +97,7 @@ targets = torch.randint(0, 2, (20,)).long()
 batch = [inputs, targets]
 
 # Next we'll need a loss function
-loss_fn = nn.functional.cross_entropy()
+loss_fn = torch.nn.functional.cross_entropy()
 
 # ... and an optimisation function
 optim = torch.optim.Adam(model.parameters())
