@@ -76,7 +76,7 @@ class TinyTorchTest():
         torch.manual_seed(seed)
 
     def assert_vars_change(self, params=None):
-        """Asserts if all variables change
+        """Asserts if variables change
 
         Parameters
         ----------
@@ -93,6 +93,26 @@ class TinyTorchTest():
             params=params,
 			supervised=self.supervised,
         )
+
+    def assert_vars_same(self, params=None):
+        """Asserts if variables don't change
+
+        Parameters
+        ----------
+
+        params : list, optional
+            list of parameters of form (name, variable)
+        """
+        return assert_vars_same(
+            self.model,
+			self.loss_fn,
+			self.optim,
+			self.batch,
+			self.device,
+            params=params,
+			supervised=self.supervised,
+        )
+
 
 def setup(seed=0):
     """Set random seed for torch"""
