@@ -23,7 +23,7 @@ Notable changes:
 
 - 	Object orientated implementation.
 
-- 	Easily reproducible test - thanks to the object orientated implementation!
+- 	Easily reproducible tests - thanks to the object orientated implementation!
 
 -   Fewer requirements (due to streamlining testing).
 
