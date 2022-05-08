@@ -115,13 +115,14 @@ class TinyTorchTest():
 			supervised=self.supervised,
         )
 
+
     def _forward_step(self):
         """Returns one forward step of the model"""
         self._seed()
         return _forward_step(self.model, self.batch, self.device)
 
 
-    def test_output_range(self, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
+    def test_output_range(self, model_out=None, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
         """Checks if the output is within the range
 
         Parameters
@@ -130,12 +131,41 @@ class TinyTorchTest():
             (low, high) tuple to check against the range of logits.
             Defaults to (MODEL_OUT_LOW, MODEL_OUT_HIGH).
         """
-        model_out = self._forward_step()
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
         assert_all_greater_than(model_out, output_range[0])
         assert_all_less_than(model_out, output_range[1])
 
 
-    def test(
+    def test_nan_vals(self, model_out=None):
+        """Tests NaN values
+
+        Parameters
+        ----------
+            model_out : tensor, optional
+                If None, gets model output by running forward pass.
+                Defaults to None.
+        """
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
+        assert_never_nan(model_out)
+
+
+    def test_inf_vals(self, model_out=None):
+        """Tests Inf values
+
+        Parameters
+        ----------
+            model_out : tensor, optional
+                If None, gets model output by running forward pass.
+                Defaults to None.
+        """
+        if isinstance(model_out, type(None)):
+            model_out = self._forward_step()
+        assert_never_inf(model_out)
+
+
+    def test( # pylint: disable=too-many-arguments
         self,
         output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
         train_vars=None,
@@ -146,84 +176,81 @@ class TinyTorchTest():
         test_inf_vals=False,
         test_gpu_available=False,
     ):
-    """Test Suite : Runs the tests enabled by the user
+        """Test Suite : Runs the tests enabled by the user
 
-    If output_range is None, output of model is tested against (MODEL_OUT_LOW,
-    MODEL_OUT_HIGH).
+        If output_range is None, output of model is tested against (MODEL_OUT_LOW,
+        MODEL_OUT_HIGH).
 
-    Parameters
-    ----------
-    output_range : tuple, optional
-        (low, high) tuple to check against the range of logits (default is
-        None)
-    train_vars : list, optional
-        list of parameters of form (name, variable) to check if they change
-        during training (default is None)
-    non_train_vars : list, optioal
-        list of parameters of form (name, variable) to check if they DO NOT
-        change during training (default is None)
-    test_output_range : boolean, optional
-        switch to turn on or off range test (default is False)
-    test_vars_change : boolean, optional
-        switch to turn on or off variables change test (default is False)
-    test_nan_vals : boolean, optional
-        switch to turn on or off test for presence of NaN values (default is False)
-    test_inf_vals : boolean, optional
-        switch to turn on or off test for presence of Inf values (default is False)
-    test_gpu_available : boolean, optional
-        switch to turn on or off GPU availability test (default is False)
-    **kwarg supervised : bool
-        True for supervised learning models. False otherwise.
+        Parameters
+        ----------
+        output_range : tuple, optional
+            (low, high) tuple to check against the range of logits (default is
+            None)
+        train_vars : list, optional
+            list of parameters of form (name, variable) to check if they change
+            during training (default is None)
+        non_train_vars : list, optioal
+            list of parameters of form (name, variable) to check if they DO NOT
+            change during training (default is None)
+        test_output_range : boolean, optional
+            switch to turn on or off range test (default is False)
+        test_vars_change : boolean, optional
+            switch to turn on or off variables change test (default is False)
+        test_nan_vals : boolean, optional
+            switch to turn on or off test for presence of NaN values (default is False)
+        test_inf_vals : boolean, optional
+            switch to turn on or off test for presence of Inf values (default is False)
+        test_gpu_available : boolean, optional
+            switch to turn on or off GPU availability test (default is False)
 
-    Raises
-    ------
-    VariablesChangeException
-        If selected params change/do not change during training
-    RangeException
-        If range of output exceeds the given limit
-    GpuUnusedException
-        If GPU is inaccessible
-    NaNTensorException
-        If one or more NaN values occur in model output
-    InfTensorException
-        If one or more Inf values occur in model output
-    """
+        Raises
+        ------
+        VariablesChangeException
+            If selected params change/do not change during training
+        RangeException
+            If range of output exceeds the given limit
+        GpuUnusedException
+            If GPU is inaccessible
+        NaNTensorException
+            If one or more NaN values occur in model output
+        InfTensorException
+            If one or more Inf values occur in model output
+        """
 
-    self._seed()
+        self._seed()
 
-    # Check if all variables change
-    if test_vars_change:
-        self.assert_vars_change()
+        # Check if all variables change
+        if test_vars_change:
+            self.assert_vars_change()
 
-    # Check if train_vars change
-    if train_vars is not None:
-        self.assert_vars_change(params=train_vars)
+        # Check if train_vars change
+        if train_vars is not None:
+            self.assert_vars_change(params=train_vars)
 
-    # Check if non_train_vars don't change
-    if non_train_vars is not None:
-        self.assert_vars_same(params=non_train_vars)
+        # Check if non_train_vars don't change
+        if non_train_vars is not None:
+            self.assert_vars_same(params=non_train_vars)
 
-    # Gets an output of the model
-    model_out = self._forward_step()
+        # Gets an output of the model
+        model_out = self._forward_step()
 
-    # Tests output range
-    if test_output_range:
-        assert_all_greater_than(model_out, output_range[0])
-        assert_all_less_than(model_out, output_range[1])
+        # Tests output range
+        if test_output_range:
+            self.test_output_range(model_out=model_out, output_range=output_range)
 
-    # NaN Test
-    if test_nan_vals:
-        assert_never_nan(model_out)
+        # NaN Test
+        if test_nan_vals:
+            self.test_nan_vals(model_out=model_out)
 
-    # Inf Test
-    if test_inf_vals:
-        assert_never_inf(model_out)
+        # Inf Test
+        if test_inf_vals:
+            self.test_inf_vals(model_out=model_out)
 
-    # GPU test
-    if test_gpu_available:
-        assert_uses_gpu()
+        # GPU test
+        if test_gpu_available:
+            assert_uses_gpu()
 
-    return True
+        return True
 
 
 def _pack_batch(tensor_or_tuple, device):
