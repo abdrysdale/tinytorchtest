@@ -249,7 +249,14 @@ test.test(test_gpu_available=True)
 # We can also explitly ask that our model and tensors be moved to the GPU
 test = ttt.TinyTorchTest(model , loss_fn, optim, batch, supervised=False, device='cuda:0')
 
-# Now all future tests will be run on the GPU
+# Now the tests will run on the GPU.
+test.test(
+	train_vars=list(model.named_parameters()),
+	test_vars_change=True,
+	test_inf_vals=True,
+	test_nan_vals=True,
+)
+# Great stuff!
 ```
 
 ## Reproducible tests
