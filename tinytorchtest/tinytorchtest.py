@@ -86,12 +86,12 @@ class TinyTorchTest():
 			supervised=self.supervised,
         )
 
-    def train_vars(self, params=None):
+    def train_vars(self, params):
         """ Checks if training variables change.
         Parameters
         ---------- 
 
-        params : list, optional
+        params : list 
             list of parameters of form (name, variable)
         """
         return assert_vars_change(
