@@ -57,27 +57,27 @@ from tinytorchtest import tinytorchtest as ttt
 
 # Get the tiny test object
 test = ttt.TinyTorchTest(
-	my_unsupervised_classification_model,	# Model
-	my_loss_function,						# Loss function
-	my_optimiser,							# Pytorch optimiser
-	my_batch,								# Batch of data
-	device="cuda:0",						# Device to load tensors to (defaults to "cpu")
-	supervised=False,						# As this model is an unsupervised (defaults to True).
-	seed=314,								# Testing seed (defaults to 42).
+	my_unsupervised_classification_model,   # Model
+	my_loss_function,                       # Loss function
+	my_optimiser,                           # Pytorch optimiser
+	my_batch,                               # Batch of data
+	device="cuda:0",                        # Device to load tensors to (defaults to "cpu")
+	supervised=False,                       # As this model is an unsupervised (defaults to True).
+	seed=314,                               # Testing seed (defaults to 42).
 )
 
 # Run the tests
 test.test(
-	output_range=(0, 1), 		# Checks the model output always falls within a range.
-	train_vars=var_list_1,		# Checks that this list of vars changes during training.
-	non_train_vars=var_list_2, 	# Checks that this list of vars doesn't change during training.
-	test_output_range=True,		# This is need to actually test the output range.
-	test_vars_change=True,		# This tests if all model parameters change during training.
-	test_nan_vals=True,			# Checks if any NaN values are predicted by the model.
-	test_inf_vals=True,			# Checks if any Inf values are predicted by the model.
-	test_gpu_available=True,	# Checks if the GPU is available.
+	output_range=(0, 1),        # Checks the model output always falls within a range.
+	train_vars=var_list_1,      # Checks that this list of vars changes during training.
+	non_train_vars=var_list_2,  # Checks that this list of vars doesn't change during training.
+	test_output_range=True,     # This is need to actually test the output range.
+	test_vars_change=True,      # This tests if all model parameters change during training.
+	test_nan_vals=True,         # Checks if any NaN values are predicted by the model.
+	test_inf_vals=True,         # Checks if any Inf values are predicted by the model.
+	test_gpu_available=True,    # Checks if the GPU is available.
 )
-# Done.
+# Done. Finito.
 ```
 
 See the below sections for a more detailed guide.
