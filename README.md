@@ -71,7 +71,7 @@ test.test(
 	output_range=(0, 1),        # Checks the model output always falls within a range.
 	train_vars=var_list_1,      # Checks that this list of vars changes during training.
 	non_train_vars=var_list_2,  # Checks that this list of vars doesn't change during training.
-	test_output_range=True,     # This is need to actually test the output range.
+	test_output_range=True,     # This is needed to actually test the output range.
 	test_vars_change=True,      # This tests if all model parameters change during training.
 	test_nan_vals=True,         # Checks if any NaN values are predicted by the model.
 	test_inf_vals=True,         # Checks if any Inf values are predicted by the model.
