@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tinytorchtest"
-version = "1.0.1"
+version = "1.0.2"
 description = "A tiny test suite for pytorch based machine learning models."
 authors = ["Alex <adrysdale@protonmail.com>"]
 license = "GPL-3.0-or-later"
