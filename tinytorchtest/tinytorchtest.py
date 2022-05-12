@@ -119,7 +119,7 @@ class TinyTorchTest():
     def _forward_step(self):
         """Returns one forward step of the model"""
         self._seed()
-        return _forward_step(self.model, self.batch, self.device)
+        return _forward_step(self.model, self.batch, self.device, supervised=self.supervised)
 
 
     def test_output_range(self, model_out=None, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
@@ -344,7 +344,7 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
     # optimization step
     optim.step()
 
-def _forward_step(model, batch, device):
+def _forward_step(model, batch, device, supervised=True):
     """Run a forward step of model for a given batch of data
 
     Parameters
@@ -366,7 +366,10 @@ def _forward_step(model, batch, device):
 
     with torch.no_grad():
         # inputs and targets
-        inputs = batch[0]
+        if supervised:
+            inputs = batch[0]
+        else:
+            inputs = batch
         # move data to DEVICE
         inputs = _pack_batch(inputs, device)
         # forward
