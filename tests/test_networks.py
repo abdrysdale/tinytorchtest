@@ -65,6 +65,29 @@ class MultiArgRegression(torch.nn.Module):
         nn_input = torch.cat((arg_1, arg_2), dim=1)
         return self.layers(nn_input)
 
+class MultiOutputRegression(torch.nn.Module):
+    """Multiple output neural network block"""
+    def __init__(self, layers, num_outputs=2):
+        """Neural network class with multiple outputs
+
+        Parameters
+        ----------
+            layers : list
+                A list of the size of each layer.
+            num_outputs : int, optional
+                The number of neural network ouptuts.
+                Defaults to 2.
+
+        """
+        super().__init__()
+        nets = []
+        for _ in range(num_outputs):
+            nets.append(SingleArgRegression(layers))
+        self.nets = torch.nn.ModuleList(nets)
+
+    def forward(self, x):
+        return [net(x) for net in self.nets]
+
 class SingleArgClassification(torch.nn.Module):
     """Single argument input (deep) neural network classification network"""
     def __init__(self, layers):

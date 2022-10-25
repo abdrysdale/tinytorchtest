@@ -137,6 +137,39 @@ def test_multiarg_unsupervised():
         test_nan_vals=True,
     )
 
+def test_multioutput_regression():
+    """Tests a multiple output supervised regression problem"""
+
+    # Sets random seed
+    torch.manual_seed(1)
+
+    # Model
+    layers = [3, 10, 1]
+    model = test_networks.MultiOutputRegression(layers, num_outputs=2)
+
+    # Data
+    batch = [torch.rand(4, 3), torch.rand(4,1)]
+
+    # Optimiser
+    optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+    # Loss
+    def _loss(outputs, targets):
+        loss_val = torch.tensor(0, dtype=torch.float)
+        for output in outputs:
+            loss_val += torch.mean(output ** 2)
+        return  torch.abs(loss_val - torch.mean(targets))
+
+    # Setup test suite
+    test = ttt.TinyTorchTest(model, _loss, optim, batch, supervised=True)
+
+    test.test(
+        train_vars=list(model.named_parameters()),
+        test_vars_change=True,
+        test_inf_vals=True,
+        test_nan_vals=True,
+    )
+
 
 def test_classification():
     """Tests a classification network"""
@@ -316,6 +349,7 @@ if __name__ == '__main__':
     test_regression_multi_args()
     test_regression_unsupervised()
     test_multiarg_unsupervised()
+    test_multioutput_regression()
     test_classification()
     test_params_dont_change()
     test_nan_exception()
