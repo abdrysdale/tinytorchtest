@@ -210,14 +210,12 @@ model = nn.Linear(20, 2)
 # Now our inputs - notice there are no labels so we just have inputs in our batch
 batch = torch.randn(20, 20)
 
-# This isn't a very useful loss function
-# but is here as an example of a loss function
-# that doesn't have any correct labels.
-# More typically this could be a physics informed 
-# neural network loss function or some other
-# unsupervised loss function
-def loss_fn(output):
-	return torch.mean(output**2)
+# Here we'll write a very basic loss function that represents a reconstruction loss.
+# This is actually a mean absolute distance loss function.
+# This would typically be used for something like an auto-encoder.
+# The important thing to note is tinytorchtest expects the loss to be loss(outputs, inputs).
+def loss_fn(output, input):
+	return torch.mean(torch.abs(output - input))
 
 # We set supervised to false, to let the test suite
 # know that there aren't any targets or correct labels.
