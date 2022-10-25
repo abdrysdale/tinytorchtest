@@ -94,8 +94,8 @@ def test_regression_unsupervised():
     optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
 
     # Loss
-    def _loss(output):
-        return torch.mean(output**2)
+    def _loss(output, input):
+        return torch.mean(output ** 2) + torch.mean(input ** 2)
 
     # Setup test suite
     test = ttt.TinyTorchTest(model, _loss, optim, batch, supervised=False)
@@ -124,8 +124,8 @@ def test_multiarg_unsupervised():
     optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
 
     # Loss
-    def _loss(output):
-        return torch.mean(output**2)
+    def _loss(output, inputs):
+        return torch.mean(output ** 2) + torch.mean([torch.mean(inp ** 2) for inp in inputs])
 
     # Setup test suite
     test = ttt.TinyTorchTest(model, _loss, optim, batch, supervised=False)
