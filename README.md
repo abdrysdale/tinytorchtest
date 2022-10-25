@@ -198,6 +198,63 @@ test.test(
 # Great! Everything works as before but with models that take multiple inputs.
 ```
 
+## Models with tuple or list outputs
+
+``` python
+# Now what about models that output a tuple or list of tensors?
+# This could be for something like a variation auto-encoder
+# or anything where it's more convienient to separate 
+# internal networks.
+
+# Lets define a model
+class MultiOutputModel(nn.Module):
+	def __init__(self, in_size, hidden_size, out_size, num_outputs):
+		super().__init__()
+
+		# This network is common for all predictions.
+		nets = [nn.Linear(in_size, hidden_size)] 
+
+		# These networks operate separately (in parallel)
+		for _ in range(num_outputs):
+			nets.append(nn.Linear(hidden_size, out_size))
+		self.nets = nn.ModuleList(nets)
+
+	def forward(self, x):
+		# Passes through the first network
+		x = self.nets[0](x)
+
+		# Returns a list of the seprate network predictions
+		return [net(x) for net in self.nets[1:]]
+
+# 10 features, 5 hidden nodes, 1 output node, 3 output models
+model = MultiOutputModel(10, 5, 1, 3)
+
+# Creates a batch with 100 samples.
+batch = [torch.rand(100, 10), torch.rand(100, 1)]
+
+# Optimiser...
+optim = torch.optim.Adam([p for p in model.parameters() if p.requires_grad])
+
+# Here we'll have to define a custom loss function to deal with the multiple outputs
+# For now, I'll use something trivial (and quite meaningless).
+def _loss(outputs, target):
+	loss_list = [torch.abs(output - target) ** p for p, output in enumerate(outputs)]
+	return torch.mean(torch.tensor(loss_list))
+
+# Setup test suite
+test = ttt.TinyTorchTest(model, _loss, optim, batch, supervised=True)
+
+# Run the tests we want to run!
+test.test(
+	train_vars=list(model.named_parameters()),
+	test_vars_change=True,
+	test_inf_vals=True,
+	test_nan_vals=True,
+)
+
+# Great! Everything works as before but with model with tuple or list outputs.
+```
+
 ## Unsupervised learning
 
 ``` python
