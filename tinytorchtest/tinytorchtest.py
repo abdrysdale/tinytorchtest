@@ -256,6 +256,14 @@ class TinyTorchTest():
 
         return True
 
+def multi_output_support(test):
+    """Runs a test on each output in outputs"""
+    def _test(outputs, *args, **kwargs):
+        if isinstance(outputs, list or tuple):
+            return [test(output, *args, **kwargs) for output in outputs]
+        return test(outputs, *args, **kwargs)
+    return _test
+
 
 def _pack_batch(tensor_or_tuple, device):
     """ Packages object ``tensor_or_tuple`` into a tuple to be unpacked.
@@ -495,6 +503,7 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs
 
     _var_change_helper(False, model, loss_fn, optim, batch, device, params, **kwargs)
 
+@multi_output_support
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
 
@@ -516,6 +525,7 @@ def assert_all_greater_than(tensor, value):
     except AssertionError as error:
         raise RangeException(f"Some elements of tensor are less than {value}") from error
 
+@multi_output_support
 def assert_all_less_than(tensor, value):
     """Make sure that all elements of tensor are less than value
 
@@ -538,6 +548,7 @@ def assert_all_less_than(tensor, value):
         raise RangeException(f"Some elements of tensor are greater than {value}") from error
 
 
+@multi_output_support
 def assert_never_nan(tensor):
     """Make sure there are no NaN values in the given tensor.
 
@@ -557,6 +568,7 @@ def assert_never_nan(tensor):
     except AssertionError as error:
         raise NaNTensorException("There was a NaN value in tensor") from error
 
+@multi_output_support
 def assert_never_inf(tensor):
     """Make sure there are no Inf values in the given tensor.
 
