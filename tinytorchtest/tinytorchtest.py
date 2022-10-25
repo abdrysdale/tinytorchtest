@@ -259,7 +259,7 @@ class TinyTorchTest():
 def multi_output_support(test):
     """Runs a test on each output in outputs"""
     def _test(outputs, *args, **kwargs):
-        if isinstance(outputs, list or tuple):
+        if isinstance(outputs, (list, tuple)):
             return [test(output, *args, **kwargs) for output in outputs]
         return test(outputs, *args, **kwargs)
     return _test
