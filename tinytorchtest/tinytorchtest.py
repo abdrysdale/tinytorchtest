@@ -337,7 +337,7 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
     if supervised:
         loss = loss_fn(outputs, *targets)
     else:
-        loss = loss_fn(outputs)
+        loss = loss_fn(outputs, inputs)
 
     # backward
     loss.backward()
