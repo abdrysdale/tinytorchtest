@@ -15,11 +15,16 @@ Forked from [BrainPugh](https://github.com/BrianPugh/torchtest) who
 forked the repo from
 [suriyadeepan](https://github.com/suriyadeepan/torchtest).
 
+Tiny torchtest actually has more features and supports more models than torchtest - albeit with fewer dependencies.
+The prefix *"tiny"* is used to highlight that this is small test suite that provides sanity checks rather than testing for convergence.
+
 Notable changes:
 
 -   Support for models to have multiple positional arguments.
 
 -   Support for unsupervised learning.
+
+-   Support for models that output a tuple or list of tensors.
 
 - 	Object orientated implementation.
 
