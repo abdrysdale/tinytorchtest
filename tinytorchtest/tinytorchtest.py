@@ -14,23 +14,30 @@ import torch
 MODEL_OUT_LOW = -1
 MODEL_OUT_HIGH = 1
 
-class GpuUnusedException(Exception): # pylint: disable=missing-class-docstring
+
+class GpuUnusedException(Exception):  # pylint: disable=missing-class-docstring
     pass
 
-class VariablesChangeException(Exception): # pylint: disable=missing-class-docstring
+
+class VariablesChangeException(Exception):  # pylint: disable=missing-class-docstring
     pass
 
-class RangeException(Exception): # pylint: disable=missing-class-docstring
+
+class RangeException(Exception):  # pylint: disable=missing-class-docstring
     pass
 
-class NaNTensorException(Exception): # pylint: disable=missing-class-docstring
+
+class NaNTensorException(Exception):  # pylint: disable=missing-class-docstring
     pass
 
-class InfTensorException(Exception): # pylint: disable=missing-class-docstring
+
+class InfTensorException(Exception):  # pylint: disable=missing-class-docstring
     pass
 
-class TinyTorchTest():
+
+class TinyTorchTest:
     """Class for the tiny torch testing suite"""
+
     def __init__(
         self,
         model,
@@ -87,12 +94,12 @@ class TinyTorchTest():
         self._seed()
         return assert_vars_change(
             self.model,
-			self.loss_fn,
-			self.optim,
-			self.batch,
-			self.device,
+            self.loss_fn,
+            self.optim,
+            self.batch,
+            self.device,
             params=params,
-			supervised=self.supervised,
+            supervised=self.supervised,
         )
 
     def assert_vars_same(self, params=None):
@@ -107,22 +114,24 @@ class TinyTorchTest():
         self._seed()
         return assert_vars_same(
             self.model,
-			self.loss_fn,
-			self.optim,
-			self.batch,
-			self.device,
+            self.loss_fn,
+            self.optim,
+            self.batch,
+            self.device,
             params=params,
-			supervised=self.supervised,
+            supervised=self.supervised,
         )
-
 
     def _forward_step(self):
         """Returns one forward step of the model"""
         self._seed()
-        return _forward_step(self.model, self.batch, self.device, supervised=self.supervised)
+        return _forward_step(
+            self.model, self.batch, self.device, supervised=self.supervised
+        )
 
-
-    def test_output_range(self, model_out=None, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)):
+    def test_output_range(
+        self, model_out=None, output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH)
+    ):
         """Checks if the output is within the range
 
         Parameters
@@ -135,7 +144,6 @@ class TinyTorchTest():
             model_out = self._forward_step()
         assert_all_greater_than(model_out, output_range[0])
         assert_all_less_than(model_out, output_range[1])
-
 
     def test_nan_vals(self, model_out=None):
         """Tests NaN values
@@ -150,7 +158,6 @@ class TinyTorchTest():
             model_out = self._forward_step()
         assert_never_nan(model_out)
 
-
     def test_inf_vals(self, model_out=None):
         """Tests Inf values
 
@@ -164,12 +171,11 @@ class TinyTorchTest():
             model_out = self._forward_step()
         assert_never_inf(model_out)
 
-    def test_gpu_available(self): # pylint: disable=no-self-use
+    def test_gpu_available(self):  # pylint: disable=no-self-use
         """Tests the GPU availability"""
         assert_uses_gpu()
 
-
-    def test( # pylint: disable=too-many-arguments
+    def test(  # pylint: disable=too-many-arguments
         self,
         output_range=(MODEL_OUT_LOW, MODEL_OUT_HIGH),
         train_vars=None,
@@ -256,17 +262,20 @@ class TinyTorchTest():
 
         return True
 
+
 def multi_output_support(test):
     """Runs a test on each output in outputs"""
+
     def _test(outputs, *args, **kwargs):
         if isinstance(outputs, (list, tuple)):
             return [test(output, *args, **kwargs) for output in outputs]
         return test(outputs, *args, **kwargs)
+
     return _test
 
 
 def _pack_batch(tensor_or_tuple, device):
-    """ Packages object ``tensor_or_tuple`` into a tuple to be unpacked.
+    """Packages object ``tensor_or_tuple`` into a tuple to be unpacked.
 
     Recursively transfers all tensor objects to device
 
@@ -288,7 +297,6 @@ def _pack_batch(tensor_or_tuple, device):
 
         output = [_helper(item) for item in tensor_or_tuple]
         return output
-
 
     if isinstance(tensor_or_tuple, torch.Tensor):
         # For backwards compatability
@@ -329,8 +337,8 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
 
     # inputs and targets
     if supervised:
-        inputs, targets = batch[0], batch[1]    # Need to recursively move these to device
-        targets = _pack_batch(targets, device) # Moves targets to device
+        inputs, targets = batch[0], batch[1]  # Need to recursively move these to device
+        targets = _pack_batch(targets, device)  # Moves targets to device
 
     else:
         inputs = batch
@@ -351,6 +359,7 @@ def _train_step(model, loss_fn, optim, batch, device, supervised=True):
     loss.backward()
     # optimization step
     optim.step()
+
 
 def _forward_step(model, batch, device, supervised=True):
     """Run a forward step of model for a given batch of data
@@ -383,7 +392,10 @@ def _forward_step(model, batch, device, supervised=True):
         # forward
         return model(*inputs)
 
-def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params=None, **kwargs):
+
+def _var_change_helper(
+    vars_change, model, loss_fn, optim, batch, device, params=None, **kwargs
+):
     """Check if given variables (params) change or not during training
 
     If parameters (params) aren't provided, check all parameters.
@@ -414,10 +426,10 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
 
     if params is None:
         # get a list of params that are allowed to change
-        params = [ np for np in model.named_parameters() if np[1].requires_grad ]
+        params = [np for np in model.named_parameters() if np[1].requires_grad]
 
     # take a copy
-    initial_params = [ (name, p.clone()) for (name, p) in params ]
+    initial_params = [(name, p.clone()) for (name, p) in params]
 
     # run a training step
     _train_step(model, loss_fn, optim, batch, device, **kwargs)
@@ -430,8 +442,9 @@ def _var_change_helper(vars_change, model, loss_fn, optim, batch, device, params
             else:
                 assert torch.equal(param_0.to(device), param_1.to(device))
         except AssertionError as error:
-            msg = 'did not change!' if vars_change else 'changed!'
+            msg = "did not change!" if vars_change else "changed!"
             raise VariablesChangeException(f"{name} {msg}") from error
+
 
 def assert_uses_gpu():
     """Make sure GPU is available and accessible
@@ -446,6 +459,7 @@ def assert_uses_gpu():
         assert torch.cuda.is_available()
     except AssertionError as error:
         raise GpuUnusedException("GPU inaccessible") from error
+
 
 def assert_vars_change(model, loss_fn, optim, batch, device, params=None, **kwargs):
     """Make sure that the given parameters (params) DO change during training
@@ -475,6 +489,7 @@ def assert_vars_change(model, loss_fn, optim, batch, device, params=None, **kwar
 
     _var_change_helper(True, model, loss_fn, optim, batch, device, params, **kwargs)
 
+
 def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs):
     """Make sure that the given parameters (params) DO NOT change during training
 
@@ -503,6 +518,7 @@ def assert_vars_same(model, loss_fn, optim, batch, device, params=None, **kwargs
 
     _var_change_helper(False, model, loss_fn, optim, batch, device, params, **kwargs)
 
+
 @multi_output_support
 def assert_all_greater_than(tensor, value):
     """Make sure that all elements of tensor are greater than value
@@ -523,7 +539,10 @@ def assert_all_greater_than(tensor, value):
     try:
         assert (tensor > value).byte().all()
     except AssertionError as error:
-        raise RangeException(f"Some elements of tensor are less than {value}") from error
+        raise RangeException(
+            f"Some elements of tensor are less than {value}"
+        ) from error
+
 
 @multi_output_support
 def assert_all_less_than(tensor, value):
@@ -545,7 +564,9 @@ def assert_all_less_than(tensor, value):
     try:
         assert (tensor < value).byte().all()
     except AssertionError as error:
-        raise RangeException(f"Some elements of tensor are greater than {value}") from error
+        raise RangeException(
+            f"Some elements of tensor are greater than {value}"
+        ) from error
 
 
 @multi_output_support
@@ -567,6 +588,7 @@ def assert_never_nan(tensor):
         assert not torch.isnan(tensor).byte().any()
     except AssertionError as error:
         raise NaNTensorException("There was a NaN value in tensor") from error
+
 
 @multi_output_support
 def assert_never_inf(tensor):

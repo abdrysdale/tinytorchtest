@@ -1,23 +1,38 @@
-#! /usr/bin/env sh
+#! python
 
-SOURCE_DIR="tinytorchtest/"
-COVERAGE_SVG=".coverage.svg"
-REQUIREMENTS="requirements.txt"
+# Python imports
+import subprocess
 
-# Installs relavent programs
-python -m pip install coverage
-python -m pip install poetry
+source_dir = "tinytorchtest/"
+coverage_svg = ".coverage.svg"
+requirements = "requirements.txt"
+files_to_add = [coverage_svg, requirements, source_dir]
 
-# Gets coverage badge
-coverage erase
-coverage run --source=${SOURCE_DIR} -m pytest
-coverage-badge -f -o ${COVERAGE_SVG}
+########
+# Lint #
+########
 
-# Updates requirements
-poetry export -o ${REQUIREMENTS}
+subprocess.run(["poetry", "run", "python", "-m", "black", source_dir])
 
-git add ${COVERAGE_SVG}
-git add ${REQUIREMENTS}
-git commit -m "Updated coverage badge and requirements"
+############
+# Coverage #
+############
 
-exit 0
+subprocess.run(["poetry", "run", "python", "-m", "coverage", "erase"])
+subprocess.run(["poetry", "install"])
+subprocess.run(["poetry", "run", "python", "-m", "coverage", "run", f"--source={source_dir}", "-m", "pytest"])
+subprocess.run(["poetry", "run", "python", "-m", "coverage-badge", "-f", "-o", coverage_svg])
+
+################
+# Requirements #
+################
+
+subprocess.run(["poetry", "export", "-o", requirements])
+
+##############
+# Update git #
+##############
+
+for git_file in files_to_add:
+    subprocess.run(["git", "add", git_file])
+subprocess.run(["git", "commit", "--amend", "--no-edit"])
