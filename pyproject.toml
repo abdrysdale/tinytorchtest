@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tinytorchtest"
-version = "1.2.1"
+version = "1.2.2"
 description = "A tiny test suite for pytorch based machine learning models."
 authors = ["Alex <adrysdale@protonmail.com>"]
 license = "GPL-3.0-or-later"
@@ -9,7 +9,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-torch = "^1.11.0"
+torch = ">= 1.11"
 toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
