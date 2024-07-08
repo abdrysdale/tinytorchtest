@@ -4,6 +4,10 @@ SOURCE_DIR="tinytorchtest/"
 COVERAGE_SVG=".coverage.svg"
 REQUIREMENTS="requirements.txt"
 
+# Installs relavent programs
+python -m pip install coverage
+python -m pip install poetry
+
 # Gets coverage badge
 coverage erase
 coverage run --source=${SOURCE_DIR} -m pytest
