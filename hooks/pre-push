@@ -2,13 +2,18 @@
 
 SOURCE_DIR="tinytorchtest/"
 COVERAGE_SVG=".coverage.svg"
+REQUIREMENTS="requirements.txt"
 
 # Gets coverage badge
 coverage erase
 coverage run --source=${SOURCE_DIR} -m pytest
 coverage-badge -f -o ${COVERAGE_SVG}
 
+# Updates requirements
+poetry export -o ${REQUIREMENTS}
+
 git add ${COVERAGE_SVG}
-git commit -m "Updated coverage badge"
+git add ${REQUIREMENTS}
+git commit -m "Updated coverage badge and requirements"
 
 exit 0
